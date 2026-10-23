@@ -316,9 +316,10 @@ Never commit: `.env`, API keys, the Mongo connection string, `.venv/`, `node_mod
 | When | Goal |
 |---|---|
 | **Fri afternoon** | Everyone set up. Scanner finds pages + cookies. Frontend shows the fake report. Atlas cluster up. Gemini says hello. |
-| **Fri night** | First **end-to-end** scan: URL in frontend → real findings on screen (even if ugly). |
-| **Sat** | The real features: classifier trained, axe-core, Vector Search over the laws, agent writes fixes, frontend polished, Saint integration. |
-| **Sat night** | Test on the 5 chosen sites. Fix what breaks. |
+| **Fri night** | Rest. Backend already scans end to end; classifier trained (72% vs 63% baseline). |
+| **Sat daytime** | Label review. Frontend calls the real API. Scans saved in Atlas. Saint brief read. |
+| **Sat ~19:00: CHECKPOINT** 🚩 | **Rough but working** demo: URL in → real findings on screen. No polish needed. Show what each person built. |
+| **Sat night** | After the checkpoint: Vector Search over the laws, Gemini (if we have a key), Saint, start polishing. Test on 5 sites. |
 | **Sun 10:00** | 🧊 **Feature freeze.** Bugs only. Record the backup demo video. Build the pitch. |
 | **Sun** | Submit to every track separately. Pitch. |
 
