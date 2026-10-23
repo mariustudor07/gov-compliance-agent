@@ -13,6 +13,8 @@ Rule: all parts talk to each other through `docs/scan_result.schema.json`. In th
 - [ ] Bogdan: collect the $100 Atlas credit at the MongoDB booth
 
 ## AI / ML lead (`backend/agent`, `backend/ml`): Gemini track
+- [ ] **Review the 285 flagged labels:** `cd backend` → `python -m ml.review` (≈25 min), then retrain.
+      Why this matters: see "Why we review labels by hand" in `docs/model_results.md`.
 - [ ] Gemini 4 Argon agent loop with tools: `crawl(url)`, `check_cookies`, `check_a11y`,
       `check_security`, `search_regulations(query)` (Bogdan's vector search), `save_report`.
       The agent decides which pages to inspect and writes the report, so it does a whole job, not just chat.

@@ -20,6 +20,22 @@ each sentence covers. GovCheck then reports the requirements that no sentence co
 | controller | 22 |
 | complaints_ico | 9 |
 
+## Why we review labels by hand (don't skip this)
+
+**Status: 285 flagged rows NOT yet reviewed.** Run `python -m ml.review` from `backend/` (≈25 min), then retrain.
+
+1. **The score is only as good as the labels.** The model is graded against `labels.csv`. If the LLM
+   pre-labels are wrong, the model learns those mistakes and the score only measures agreement with
+   the LLM, not correctness. Reviewing the disputed rows turns guesses into checked labels the score can rest on.
+2. **Judges will ask how we got the data.** "An AI labelled it" is weak. "An LLM pre-labelled it, our
+   keyword rules flagged the 285 disagreements, and we reviewed every one by hand" is a real
+   human-in-the-loop method.
+3. **It makes the model ours.** On a CV: "built and labelled a dataset of 765 sentences from UK
+   privacy notices; trained a classifier that beats a keyword baseline by 9 points". Only true if we did the labelling.
+
+**Honesty rule:** until the review is done, describe the data as "LLM-labelled, not yet human-reviewed".
+`human_checked = True` in `labels.csv` marks exactly which rows a person checked.
+
 ## Model
 TF-IDF on words (1–2 grams) + character patterns (2–5 chars) → linear SVM (class-balanced) with
 probability calibration. Trains in seconds, runs offline, costs nothing per scan.
