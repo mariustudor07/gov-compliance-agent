@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScanResult",
+  "type": "object",
+  "required": ["url", "scanned_at", "scores", "findings"],
+  "properties": {
+    "url": { "type": "string" },
+    "scanned_at": { "type": "string", "format": "date-time" },
+    "pages_crawled": { "type": "array", "items": { "type": "string" } },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "overall": { "type": "number" },
+        "accessibility": { "type": "number" },
+        "cookies": { "type": "number" },
+        "privacy": { "type": "number" },
+        "security": { "type": "number" }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "severity", "title"],
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "enum": ["accessibility", "cookies", "privacy", "security"] },
+          "severity": { "enum": ["critical", "high", "medium", "low", "pass"] },
+          "title": { "type": "string" },
+          "evidence": { "type": "string" },
+          "page": { "type": "string" },
+          "regulation": { "type": "string" },
+          "fix": { "type": "string" }
+        }
+      }
+    },
+    "summary": { "type": "string", "description": "The agent's plain-English summary" }
+  }
+}

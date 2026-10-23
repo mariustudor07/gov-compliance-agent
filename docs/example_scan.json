@@ -1,0 +1,19 @@
+{
+  "url": "https://example.com",
+  "scanned_at": "2026-10-23T14:00:00Z",
+  "pages_crawled": ["https://example.com/", "https://example.com/privacy"],
+  "scores": { "overall": 58, "accessibility": 62, "cookies": 30, "privacy": 70, "security": 70 },
+  "findings": [
+    { "id": "ck-1", "category": "cookies", "severity": "critical",
+      "title": "Analytics cookies set before consent",
+      "evidence": "_ga, _gid set on first load", "page": "https://example.com/",
+      "regulation": "PECR reg. 6", "fix": "Load Google Analytics only after the user accepts." },
+    { "id": "a11y-1", "category": "accessibility", "severity": "high",
+      "title": "Images missing alt text (12)", "page": "https://example.com/",
+      "regulation": "WCAG 2.2 SC 1.1.1", "fix": "Add descriptive alt attributes." },
+    { "id": "sec-1", "category": "security", "severity": "medium",
+      "title": "No Content-Security-Policy header", "regulation": "NCSC guidance",
+      "fix": "Add a CSP header restricting script sources." }
+  ],
+  "summary": "The site loads tracking cookies without consent and has several accessibility gaps."
+}

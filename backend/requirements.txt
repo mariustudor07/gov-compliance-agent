@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+playwright
+httpx
+beautifulsoup4
+pymongo
+python-dotenv
+google-genai
+scikit-learn
+pandas
