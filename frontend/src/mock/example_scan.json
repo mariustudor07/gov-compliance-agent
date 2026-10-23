@@ -1,0 +1,104 @@
+{
+  "url": "https://motorlog.app",
+  "scanned_at": "2026-10-23T19:34:41.321768+00:00",
+  "pages_crawled": [
+    "https://motorlog.app/quick-check",
+    "https://motorlog.app/privacy"
+  ],
+  "scores": {
+    "accessibility": 20,
+    "cookies": 100,
+    "privacy": 80,
+    "security": 77,
+    "overall": 69
+  },
+  "findings": [
+    {
+      "id": "ck-preconsent",
+      "category": "cookies",
+      "severity": "pass",
+      "title": "No known tracking cookies set before consent",
+      "evidence": "",
+      "page": "https://motorlog.app/quick-check",
+      "regulation": "",
+      "fix": ""
+    },
+    {
+      "id": "a11y-color-contrast-0",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Elements must meet minimum color contrast ratio thresholds (3 element(s))",
+      "severity_reason": "High because it affects 3 elements on the most-visited page, including the privacy policy link — low-vision users may not be able to find it at all.",
+      "evidence": "<p class=\"text-[11px] text-[#555555]\">Motorlog · <a class=\"underline hover:text-white transition-colors\" href=\"/privacy\">Privacy Policy</a> · <a class=\"underline hover:text-white transition-colors\" hr",
+      "page": "https://motorlog.app/quick-check",
+      "regulation": "WCAG 2.2 AA (Public Sector Bodies Accessibility Regulations 2018)",
+      "fix": "Increase the contrast between text and background to at least 4.5:1 (3:1 for large text)."
+    },
+    {
+      "id": "a11y-button-name-1",
+      "category": "accessibility",
+      "severity": "critical",
+      "title": "Buttons must have discernible text (1 element(s))",
+      "severity_reason": "Critical because a screen reader user cannot tell what this button does or that it exists — it's a hard blocker, not just an inconvenience.",
+      "evidence": "<button class=\"w-9 h-9 flex items-center justify-center bg-[#141414] rounded-xl border border-[#222222] text-[#888888] hover:text-white hover:border-[#444444] transition-colors\">",
+      "page": "https://motorlog.app/privacy",
+      "regulation": "WCAG 2.2 AA (Public Sector Bodies Accessibility Regulations 2018)",
+      "fix": "Give icon-only buttons an accessible name, e.g. aria-label=\"Open menu\"."
+    },
+    {
+      "id": "a11y-color-contrast-2",
+      "category": "accessibility",
+      "severity": "high",
+      "title": "Elements must meet minimum color contrast ratio thresholds (4 element(s))",
+      "severity_reason": "High because it hits 4 elements, including the contact email — the main way someone would reach the data controller.",
+      "evidence": "<p class=\"text-xs text-center text-[#555555] mt-4\">Questions? <a href=\"mailto:privacy@motorlog.app\" class=\"text-[#FFD700] hover:underline\">privacy@motorlog.app</a></p>",
+      "page": "https://motorlog.app/privacy",
+      "regulation": "WCAG 2.2 AA (Public Sector Bodies Accessibility Regulations 2018)",
+      "fix": "Increase the contrast between text and background to at least 4.5:1 (3:1 for large text)."
+    },
+    {
+      "id": "sec-content-security-policy",
+      "category": "security",
+      "severity": "medium",
+      "title": "No Content-Security-Policy header",
+      "severity_reason": "Medium because there's no evidence of an active exploit, but without a CSP a single XSS bug anywhere on the site has nothing stopping it.",
+      "evidence": "header missing",
+      "page": "https://motorlog.app/quick-check",
+      "regulation": "NCSC guidance: Protecting websites",
+      "fix": "Add a Content-Security-Policy header that only allows scripts from your own domain and trusted sources, e.g. default-src 'self'. Start in Report-Only mode to test it."
+    },
+    {
+      "id": "sec-x-content-type-options",
+      "category": "security",
+      "severity": "low",
+      "title": "No X-Content-Type-Options header",
+      "evidence": "header missing",
+      "page": "https://motorlog.app/quick-check",
+      "regulation": "NCSC guidance: Protecting websites",
+      "fix": "Add the header: X-Content-Type-Options: nosniff"
+    },
+    {
+      "id": "sec-clickjacking",
+      "category": "security",
+      "severity": "medium",
+      "title": "No clickjacking protection (X-Frame-Options / frame-ancestors)",
+      "severity_reason": "Medium because the site doesn't handle payments or logins on this page, so the clickjacking impact is limited, but it's still an easy fix worth doing.",
+      "evidence": "header missing",
+      "page": "https://motorlog.app/quick-check",
+      "regulation": "NCSC guidance: Protecting websites",
+      "fix": "Add Content-Security-Policy: frame-ancestors 'self' (or X-Frame-Options: DENY) so other sites can't embed yours in a frame."
+    },
+    {
+      "id": "pv-controller",
+      "category": "privacy",
+      "severity": "high",
+      "title": "Privacy notice doesn't say who the data controller is",
+      "severity_reason": "High because UK GDPR Art. 13(1)(a) makes this mandatory, not optional — without it, people have no one to direct a data request or complaint to.",
+      "evidence": "our trained classifier found no sentence covering this",
+      "page": "https://motorlog.app/privacy",
+      "regulation": "UK GDPR Art. 13(1)(a)",
+      "fix": "State the legal name and address of the organisation (or person) responsible for the data, e.g. 'Example Ltd, 1 High Street, London, is the data controller.'"
+    }
+  ],
+  "summary": "We found 7 issues (1 critical, 3 high, 2 medium, 1 low). Fix these first: Buttons must have discernible text (1 element(s)); Elements must meet minimum color contrast ratio thresholds (3 element(s)); Elements must meet minimum color contrast ratio thresholds (4 element(s))."
+}

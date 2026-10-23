@@ -27,6 +27,10 @@
           "category": { "enum": ["accessibility", "cookies", "privacy", "security"] },
           "severity": { "enum": ["critical", "high", "medium", "low", "pass"] },
           "title": { "type": "string" },
+          "severity_reason": {
+            "type": "string",
+            "description": "Why THIS finding got this severity (not a generic definition), e.g. 'Critical because the banner has no reject option, so PECR consent is never actually given.' Optional — the frontend falls back to a generic per-severity explanation when absent."
+          },
           "evidence": { "type": "string" },
           "page": { "type": "string" },
           "regulation": { "type": "string" },
