@@ -49,7 +49,7 @@ def main():
         print(f"\n  Current label:   {r['label'].upper()}")
         print(f"  Keyword rules:   {r['second_opinion']}\n")
         print(menu)
-        answer = input("\nEnter = keep, 1-9 = change, b = back, q = save & quit > ").strip().lower()
+        answer = input("\nEnter = keep, 1-9 = change, s = skip, b = back, q = save & quit >").strip().lower()
 
         if answer == "q":
             break
