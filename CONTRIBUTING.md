@@ -1,6 +1,6 @@
 # Git workflow (kept simple for a hackathon)
 
-- `main` must always run. Nobody pushes straight to it.
+- `main` must always run. GitHub blocks direct pushes to it; changes go in by pull request with 1 approval from someone else.
 - One branch per person/feature: `ai/classifier`, `scanner/cookies`, `frontend/report`, `db/scans`
 - Commit small and often. Pull `main` into your branch before opening a PR.
 - Open a PR, have someone else glance at it, then merge (squash merge is fine).

@@ -285,7 +285,8 @@ Already installed on the AI lead's laptop: Python 3.12, Git, GitHub CLI, Node. T
 
 ## 7. Git: how we work together
 
-**`main` must always work.** Nobody commits straight to `main`.
+**`main` must always work, and GitHub enforces it.** Pushing straight to `main` is blocked for everyone.
+The only way in is a pull request that **one other teammate approves**. Force-pushing and deleting `main` are blocked too.
 
 ```
 # once, at the start
