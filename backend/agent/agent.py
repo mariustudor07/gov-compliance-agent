@@ -11,14 +11,15 @@ from ml.classify import missing_clauses, model_name
 from scanner.findings import finding
 from scanner.scan import run_scan
 
+from .fixes import apply_fixes, summarise
 from .prompts import CLAUSE_TITLES, SYSTEM_PROMPT
 from .scoring import score
 
 
 def analyse(url):
     scan = run_scan(url)
-    findings = scan["findings"] + _privacy_findings(scan)
-    summary = _explain_with_gemini(url, findings)
+    findings = apply_fixes(scan["findings"] + _privacy_findings(scan))
+    summary = _explain_with_gemini(url, findings) or summarise(findings)
 
     return {
         "url": url,
@@ -51,19 +52,23 @@ def _privacy_findings(scan):
 def _explain_with_gemini(url, findings):
     """Gemini adds a regulation + fix to each finding and writes the summary.
     It can call search_regulations() itself to look up the law in MongoDB."""
-    if not os.getenv("GEMINI_API_KEY"):
-        return "Gemini not configured: set GEMINI_API_KEY in .env"
+    if not os.getenv("GEMINI_API_KEY") or not os.getenv("GEMINI_MODEL"):
+        return ""  # built-in fixes and summary are used instead
 
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     problems = [f for f in findings if f["severity"] != "pass"]
-    response = client.models.generate_content(
-        model=os.environ["GEMINI_MODEL"],
-        contents=f"Website: {url}\n\nFindings:\n{json.dumps(problems, indent=2)}",
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            tools=[search_regulations],  # the SDK runs the tool calls for us
-        ),
-    )
+    try:
+        response = client.models.generate_content(
+            model=os.environ["GEMINI_MODEL"],
+            contents=f"Website: {url}\n\nFindings:\n{json.dumps(problems, indent=2)}",
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                tools=[search_regulations],  # the SDK runs the tool calls for us
+            ),
+        )
+    except Exception as e:
+        print(f"Gemini failed, using built-in fixes: {e}")
+        return ""
 
     try:
         text = response.text.strip().removeprefix("```json").removesuffix("```")

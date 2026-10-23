@@ -1,10 +1,14 @@
 """Step 2 of our own model: train a privacy-clause classifier on data/labels.csv.
 
-TF-IDF turns each sentence into word-frequency numbers; LogisticRegression learns which
-words point to which clause type. Simple, fast, and we can explain every part of it to judges.
+Model: TF-IDF features from words AND character patterns (which catch spelling variants like
+"retain/retention/retained"), fed into a linear SVM. Calibration on top gives a confidence
+score per prediction, which classify.py uses.
 
-If data/synthetic.csv exists (from synthesize.py), it is added to the TRAINING data only.
-The test set is always real, human-checked sentences.
+Evaluation: 5-fold cross-validation. Every real sentence is tested exactly once by a model
+that never saw it. That gives fairer numbers than one random split on a small dataset.
+
+If data/synthetic.csv exists (from synthesize.py), it is added to the TRAINING folds only.
+The test sentences are always real.
 
 Run it, then copy the printed tables into docs/model_results.md.
 """
@@ -12,11 +16,12 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import make_pipeline, make_union
+from sklearn.svm import LinearSVC
 
 from ml import keywords
 
@@ -25,39 +30,44 @@ MODEL = DATA / "clause_model.joblib"
 
 
 def new_model():
-    return make_pipeline(
-        TfidfVectorizer(ngram_range=(1, 2), min_df=1, sublinear_tf=True),
-        LogisticRegression(max_iter=1000, class_weight="balanced"),
+    features = make_union(
+        TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True),
+        TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), sublinear_tf=True),
     )
+    return make_pipeline(features, CalibratedClassifierCV(LinearSVC(class_weight="balanced"), cv=3))
+
+
+def cross_validate(real, synthetic=None):
+    """Predict every real sentence with a model trained on the other 4/5 of the data."""
+    predictions = pd.Series(index=real.index, dtype=object)
+    folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    for train_idx, test_idx in folds.split(real["sentence"], real["label"]):
+        train = real.iloc[train_idx]
+        if synthetic is not None:
+            train = pd.concat([train, synthetic])
+        model = new_model().fit(train["sentence"], train["label"])
+        predictions.iloc[test_idx] = model.predict(real["sentence"].iloc[test_idx])
+    return predictions
 
 
 def main():
-    real = pd.read_csv(DATA / "labels.csv").dropna(subset=["sentence", "label"])
+    real = pd.read_csv(DATA / "labels.csv").dropna(subset=["sentence", "label"]).reset_index(drop=True)
     print(f"{len(real)} real labelled sentences\n{real['label'].value_counts()}\n")
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        real["sentence"], real["label"], test_size=0.2, random_state=42, stratify=real["label"])
-
     print("=== Keyword baseline (hand-written rules, the score to beat) ===")
-    print(classification_report(y_test, [keywords.predict(s) for s in X_test], zero_division=0))
+    print(classification_report(real["label"], [keywords.predict(s) for s in real["sentence"]], zero_division=0))
 
-    model = new_model().fit(X_train, y_train)
-    print("=== Trained model: real data only ===")
-    print(classification_report(y_test, model.predict(X_test)))
+    print("=== Trained model, 5-fold cross-validation ===")
+    print(classification_report(real["label"], cross_validate(real), zero_division=0))
 
     synthetic_path = DATA / "synthetic.csv"
     synthetic = pd.read_csv(synthetic_path) if synthetic_path.exists() else None
     if synthetic is not None:
-        model = new_model().fit(pd.concat([X_train, synthetic["sentence"]]),
-                                pd.concat([y_train, synthetic["label"]]))
-        print(f"=== Real + {len(synthetic)} synthetic (same real test set) ===")
-        print(classification_report(y_test, model.predict(X_test)))
+        print(f"=== Trained model + {len(synthetic)} synthetic sentences (tested on real only) ===")
+        print(classification_report(real["label"], cross_validate(real, synthetic), zero_division=0))
 
-    # Final model: all real data (+ synthetic if present).
-    X_all, y_all = real["sentence"], real["label"]
-    if synthetic is not None:
-        X_all, y_all = pd.concat([X_all, synthetic["sentence"]]), pd.concat([y_all, synthetic["label"]])
-    joblib.dump(new_model().fit(X_all, y_all), MODEL)
+    final = pd.concat([real, synthetic]) if synthetic is not None else real
+    joblib.dump(new_model().fit(final["sentence"], final["label"]), MODEL)
     print(f"Saved {MODEL}")
 
 

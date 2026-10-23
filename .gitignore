@@ -9,3 +9,4 @@ data/raw/
 *.pkl
 *.joblib
 .DS_Store
+!data/clause_model.joblib
