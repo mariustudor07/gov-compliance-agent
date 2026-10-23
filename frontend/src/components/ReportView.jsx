@@ -1,8 +1,9 @@
 import ScoreTile from "./ScoreTile";
 import FindingCard from "./FindingCard";
 import SeverityDonut from "./SeverityDonut";
+import PriorityFixes from "./PriorityFixes";
 import Reveal from "./Reveal";
-import { ReportIcon, AccessibilityIcon, CookieIcon, EyeIcon, ShieldIcon } from "./icons";
+import { ReportIcon, AccessibilityIcon, CookieIcon, EyeIcon, ShieldIcon, SparkleIcon } from "./icons";
 import { CATEGORY_LABEL, formatDate, groupBySeverity, countBySeverity } from "../lib/format";
 
 const CATEGORY_ICON = {
@@ -45,11 +46,20 @@ export default function ReportView({ result, usingMock = false }) {
       </div>
       <p className="scores__hint">Tap a score to see the law it's judged against.</p>
 
-      {summary && <p className="report__summary">{summary}</p>}
+      {summary && (
+        <Reveal className="summary">
+          <span className="summary__icon">
+            <SparkleIcon width={16} height={16} />
+          </span>
+          <p>{summary}</p>
+        </Reveal>
+      )}
 
       <Reveal className="findings-overview">
         <SeverityDonut counts={counts} />
       </Reveal>
+
+      <PriorityFixes findings={findings} />
 
       {grouped.map((group, groupIndex) => (
         <section key={group.severity} className="finding-group">
@@ -58,7 +68,12 @@ export default function ReportView({ result, usingMock = false }) {
           </h2>
           <ul className="finding-list">
             {group.findings.map((f, i) => (
-              <Reveal as="li" key={f.id} delay={Math.min(i, 5) * 60 + groupIndex * 20}>
+              <Reveal
+                as="li"
+                id={`finding-${f.id}`}
+                key={f.id}
+                delay={Math.min(i, 5) * 60 + groupIndex * 20}
+              >
                 <FindingCard finding={f} />
               </Reveal>
             ))}
