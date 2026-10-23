@@ -27,7 +27,8 @@ def crawl(url, max_pages=5):
     pages = []
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        context = browser.new_context()
+        # bypass_csp lets us inject axe-core; the real CSP header is still recorded for security checks.
+        context = browser.new_context(bypass_csp=True)
         page = context.new_page()
 
         response = page.goto(url, wait_until="load", timeout=30000)
