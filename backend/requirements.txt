@@ -6,5 +6,7 @@ beautifulsoup4
 pymongo
 python-dotenv
 google-genai
+voyageai
 scikit-learn
 pandas
+joblib

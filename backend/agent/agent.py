@@ -1,0 +1,78 @@
+"""analyse(url): the whole GovCheck pipeline, from URL to finished ScanResult."""
+import json
+import os
+from datetime import datetime, timezone
+
+from google import genai
+from google.genai import types
+
+from db.regulations import search_regulations
+from ml.classify import missing_clauses
+from scanner.findings import finding
+from scanner.scan import run_scan
+
+from .prompts import CLAUSE_TITLES, SYSTEM_PROMPT
+from .scoring import score
+
+
+def analyse(url):
+    scan = run_scan(url)
+    findings = scan["findings"] + _privacy_findings(scan)
+    summary = _explain_with_gemini(url, findings)
+
+    return {
+        "url": url,
+        "scanned_at": datetime.now(timezone.utc).isoformat(),
+        "pages_crawled": scan["pages_crawled"],
+        "scores": score(findings),
+        "findings": findings,
+        "summary": summary,
+    }
+
+
+def _privacy_findings(scan):
+    """Runs OUR classifier on the privacy policy."""
+    page = next((p for p in scan["pages_crawled"] if "privacy" in p.lower()), "")
+    if not scan["privacy_text"]:
+        return [finding("pv-none", "privacy", "critical", "No privacy notice found",
+                        evidence="no privacy page linked from the homepage", regulation="UK GDPR Art. 13")]
+
+    missing = missing_clauses(scan["privacy_text"])
+    if missing is None:  # model not trained yet
+        return []
+    return [finding(f"pv-{clause}", "privacy", "high", CLAUSE_TITLES[clause],
+                    evidence="our clause classifier found no sentence covering this",
+                    page=page, regulation="UK GDPR Art. 13")
+            for clause in missing]
+
+
+def _explain_with_gemini(url, findings):
+    """Gemini adds a regulation + fix to each finding and writes the summary.
+    It can call search_regulations() itself to look up the law in MongoDB."""
+    if not os.getenv("GEMINI_API_KEY"):
+        return "Gemini not configured: set GEMINI_API_KEY in .env"
+
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    problems = [f for f in findings if f["severity"] != "pass"]
+    response = client.models.generate_content(
+        model=os.environ["GEMINI_MODEL"],
+        contents=f"Website: {url}\n\nFindings:\n{json.dumps(problems, indent=2)}",
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            tools=[search_regulations],  # the SDK runs the tool calls for us
+        ),
+    )
+
+    try:
+        text = response.text.strip().removeprefix("```json").removesuffix("```")
+        answer = json.loads(text)
+    except (ValueError, AttributeError):
+        return response.text or ""
+
+    by_id = {f["id"]: f for f in findings}
+    for item in answer.get("findings", []):
+        f = by_id.get(item.get("id"))
+        if f:
+            f["fix"] = item.get("fix") or f["fix"]
+            f["regulation"] = item.get("regulation") or f["regulation"]
+    return answer.get("summary", "")
