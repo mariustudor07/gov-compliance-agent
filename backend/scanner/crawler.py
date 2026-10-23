@@ -31,8 +31,7 @@ def crawl(url, max_pages=5):
         context = browser.new_context(bypass_csp=True)
         page = context.new_page()
 
-        response = page.goto(url, wait_until="load", timeout=30000)
-        page.wait_for_timeout(2000)  # give cookie scripts time to run
+        response = _goto(page, url)
         # Nothing has been clicked yet, so every cookie here was set without consent.
         cookies_before_consent = context.cookies()
         pages.append(_snapshot(page, response))
@@ -47,7 +46,7 @@ def crawl(url, max_pages=5):
 
         for href in wanted[: max_pages - 1]:
             try:
-                response = page.goto(href, wait_until="load", timeout=30000)
+                response = _goto(page, href)
                 pages.append(_snapshot(page, response))
             except Exception as e:
                 print(f"Could not open {href}: {e}")
@@ -55,6 +54,17 @@ def crawl(url, max_pages=5):
         browser.close()
 
     return {"pages": pages, "cookies_before_consent": cookies_before_consent}
+
+
+def _goto(page, url):
+    """Open a page and wait until JavaScript-rendered content (React/Next.js sites) has loaded."""
+    response = page.goto(url, wait_until="load", timeout=30000)
+    try:
+        page.wait_for_load_state("networkidle", timeout=10000)
+    except Exception:
+        pass  # sites with constant background traffic never go idle; carry on with what we have
+    page.wait_for_timeout(1500)  # cookie scripts and late renders
+    return response
 
 
 def _snapshot(page, response):

@@ -4,6 +4,8 @@ from pathlib import Path
 
 import joblib
 
+from . import keywords
+
 MODEL_PATH = Path(__file__).resolve().parents[2] / "data" / "clause_model.joblib"
 
 # What UK GDPR Articles 13/14 require a privacy notice to contain.
@@ -21,14 +23,21 @@ def _load():
     return _model
 
 
+def model_name():
+    return "trained classifier" if _load() is not None else "keyword baseline"
+
+
 def classify_sentences(text):
-    """Returns [{"sentence", "label", "confidence"}] or None if the model isn't trained yet."""
-    model = _load()
-    if model is None:
-        return None
+    """Returns [{"sentence", "label", "confidence"}].
+    Uses our trained model if data/clause_model.joblib exists, otherwise the keyword baseline."""
     sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n+", text) if len(s.strip()) >= 30]
     if not sents:
         return []
+
+    model = _load()
+    if model is None:
+        return [{"sentence": s, "label": keywords.predict(s), "confidence": 1.0} for s in sents]
+
     probs = model.predict_proba(sents)
     results = []
     for sentence, row in zip(sents, probs):
@@ -38,10 +47,6 @@ def classify_sentences(text):
 
 
 def missing_clauses(text):
-    """Which required clauses the privacy policy doesn't seem to contain.
-    Returns a list of labels, or None if the model isn't trained yet."""
-    results = classify_sentences(text)
-    if results is None:
-        return None
-    found = {r["label"] for r in results if r["confidence"] >= MIN_CONFIDENCE}
+    """Which required clauses the privacy policy doesn't seem to contain."""
+    found = {r["label"] for r in classify_sentences(text) if r["confidence"] >= MIN_CONFIDENCE}
     return [c for c in REQUIRED if c not in found]

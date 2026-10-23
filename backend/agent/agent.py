@@ -7,7 +7,7 @@ from google import genai
 from google.genai import types
 
 from db.regulations import search_regulations
-from ml.classify import missing_clauses
+from ml.classify import missing_clauses, model_name
 from scanner.findings import finding
 from scanner.scan import run_scan
 
@@ -38,10 +38,12 @@ def _privacy_findings(scan):
                         evidence="no privacy page linked from the homepage", regulation="UK GDPR Art. 13")]
 
     missing = missing_clauses(scan["privacy_text"])
-    if missing is None:  # model not trained yet
-        return []
+    if not missing:
+        return [finding("pv-complete", "privacy", "pass",
+                        "Privacy notice covers all required UK GDPR Art. 13 information",
+                        evidence=f"checked by our {model_name()}", page=page)]
     return [finding(f"pv-{clause}", "privacy", "high", CLAUSE_TITLES[clause],
-                    evidence="our clause classifier found no sentence covering this",
+                    evidence=f"our {model_name()} found no sentence covering this",
                     page=page, regulation="UK GDPR Art. 13")
             for clause in missing]
 

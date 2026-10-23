@@ -68,6 +68,7 @@ POLICY_URLS = [
 SENTENCES_PER_URL = 40
 BATCH_SIZE = 40
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) GovCheck-research/0.1"}
+SENTENCES = Path(__file__).resolve().parents[2] / "data" / "sentences.csv"
 OUT = Path(__file__).resolve().parents[2] / "data" / "labels.csv"
 
 # Two differently worded prompts, so their mistakes don't line up.
@@ -104,8 +105,8 @@ def ask_gemini(client, prompt_template, batch):
     return [lab if lab in LABELS else "other" for lab in labels]
 
 
-def main():
-    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+def fetch_all():
+    """Download and sample sentences from every policy into data/sentences.csv (no API needed)."""
     random.seed(42)
     rows = []
     for url in POLICY_URLS:
@@ -117,6 +118,25 @@ def main():
         sample = random.sample(sents, min(SENTENCES_PER_URL, len(sents)))
         rows += [(s, url) for s in sample]
         print(f"{len(sample):3} sentences from {url}")
+
+    with SENTENCES.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["sentence", "source"])
+        writer.writerows(rows)
+    print(f"Saved {len(rows)} sentences to {SENTENCES}")
+    return rows
+
+
+def load_sentences():
+    if not SENTENCES.exists():
+        return fetch_all()
+    with SENTENCES.open(encoding="utf-8") as f:
+        return [(r["sentence"], r["source"]) for r in csv.DictReader(f)]
+
+
+def main():
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    rows = load_sentences()
 
     disagreements = 0
     with OUT.open("w", newline="", encoding="utf-8") as f:
@@ -138,4 +158,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    if sys.argv[1:] == ["fetch"]:  # python -m ml.label fetch  -> download only, no API key needed
+        fetch_all()
+    else:
+        main()

@@ -18,6 +18,8 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 
+from ml import keywords
+
 DATA = Path(__file__).resolve().parents[2] / "data"
 MODEL = DATA / "clause_model.joblib"
 
@@ -36,8 +38,11 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(
         real["sentence"], real["label"], test_size=0.2, random_state=42, stratify=real["label"])
 
+    print("=== Keyword baseline (hand-written rules, the score to beat) ===")
+    print(classification_report(y_test, [keywords.predict(s) for s in X_test], zero_division=0))
+
     model = new_model().fit(X_train, y_train)
-    print("=== Real data only ===")
+    print("=== Trained model: real data only ===")
     print(classification_report(y_test, model.predict(X_test)))
 
     synthetic_path = DATA / "synthetic.csv"
