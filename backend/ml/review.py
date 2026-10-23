@@ -3,6 +3,7 @@
 Run it in PyCharm (right-click -> Run 'review'). For each sentence, type:
     Enter        keep the current label
     1-9          change to that label
+    s            skip (unsure) - stays flagged so you can come back to it
     b            go back one sentence
     q            save and quit (you can carry on later, it remembers where you got to)
 
@@ -55,10 +56,13 @@ def main():
         if answer == "b":
             pos = max(0, pos - 1)
             continue
+        if answer == "s":
+            pos += 1
+            continue
         if answer.isdigit() and 1 <= int(answer) <= len(LABELS):
             r["label"] = LABELS[int(answer) - 1]
         elif answer:
-            print("  ?? Type Enter, a number 1-9, b or q")
+            print("  ?? Type Enter, a number 1-9, s, b or q")
             continue
         r["needs_review"] = "False"
         r["human_checked"] = "True"
