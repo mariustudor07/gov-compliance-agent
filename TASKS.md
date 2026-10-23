@@ -1,45 +1,55 @@
 # Tasks: Fri 23 -> Sun 25 Oct
 
+Tracks we're entering with one project:
+**Agents That Ship** (main), **Google DeepMind / Gemini 4 Argon**, **MongoDB Atlas**, **Saint**.
+Read each track's full brief and judging criteria. Each track needs its own submission.
+
 Rule: all parts talk to each other through `docs/scan_result.schema.json`. In the first hour, agree on it, then split up.
 
 ## Everyone, first hour
 - [ ] Accept the GitHub invite, clone, make your branch (see CONTRIBUTING.md)
 - [ ] Agree on the scan result schema (15 min max)
 - [ ] Pick 5 test sites: 2 gov.uk pages (should pass), 3 small random sites (should fail)
+- [ ] Bogdan: collect the $100 Atlas credit at the MongoDB booth
 
-## AI / ML lead (`backend/ml`, `backend/agent`)
-- [ ] **Our own ML model (the "from scratch" part):** a classifier for privacy-policy clauses
-  - label ~300-500 sentences from real privacy policies as: controller, lawful_basis,
-    rights, retention, contact_dpo, third_parties, other (have Gemini pre-label, then correct by hand)
-  - baseline: TF-IDF + LogisticRegression (scikit-learn); put precision/recall in `docs/`
-  - stretch goal: fine-tune a small model (DistilBERT) and compare it with the baseline
-- [ ] Gemini agent: takes the scanner findings and classifier output and writes a plain-English report,
-      with severity, fix suggestions and the regulation it cites. Use Flash to keep costs down; cache results per URL.
+## AI / ML lead (`backend/agent`, `backend/ml`): Gemini track
+- [ ] Gemini 4 Argon agent loop with tools: `crawl(url)`, `check_cookies`, `check_a11y`,
+      `check_security`, `search_regulations(query)` (Bogdan's vector search), `save_report`.
+      The agent decides which pages to inspect and writes the report, so it does a whole job, not just chat.
+- [ ] Our own ML model: a privacy-policy clause classifier (controller, lawful_basis, rights,
+      retention, contact_dpo, third_parties, other). Gemini pre-labels ~400 sentences, we correct them,
+      then train TF-IDF + LogisticRegression and put precision/recall in `docs/`. Stretch goal: DistilBERT.
 - [ ] Score function (0-100 per category + overall)
-- [ ] Wire up `POST /scan` with Rolef
+- [ ] Every finding cites the regulation text that Atlas Vector Search returns
 
-## Rolef: scanner / security checks (`backend/scanner`)
-- [ ] Playwright crawler: load the homepage and up to N internal links; find the privacy, cookie and accessibility pages
-- [ ] Cookie check: record cookies *before* clicking anything; detect the banner and its reject button
-- [ ] Accessibility: inject axe-core and collect WCAG violations
-- [ ] Security headers, TLS and mixed content checks
-- [ ] Output findings in the schema format
+## Rolef: scanner (`backend/scanner`) + Saint track
+- [ ] Playwright crawler: find the privacy, cookie and accessibility statement pages
+- [ ] Cookie check: cookies set *before* consent; banner and reject button present
+- [ ] Accessibility: inject axe-core, map violations to WCAG 2.2 AA
+- [ ] Security: HTTPS, HSTS, CSP, X-Frame-Options, TLS version, mixed content
+- [ ] **Saint:** read the Saint brief and find out what Saint can trigger or call. Goal: Saint as the
+      user's assistant, e.g. "watch my council's website and tell me if it breaks compliance",
+      running scheduled re-scans and sending a summary through Saint. Saint is a separate prize,
+      so it needs a clear demo moment.
+
+## Bogdan: MongoDB Atlas (`backend/db`): MongoDB track (more Atlas features = more points)
+- [ ] Atlas cluster; connection string shared privately, never in git
+- [ ] Collections: `scans`, `sites`, `labels` (ML training data), `regulations`
+- [ ] **Vector Search + Voyage AI / Automated Embedding:** chunk UK GDPR, PECR, WCAG 2.2 and the
+      2018 accessibility regulations into `regulations`, embed them, and expose `search_regulations(query)` for the agent (RAG)
+- [ ] **Atlas Search / Hybrid Search:** search across past scans ("sites with pre-consent cookies")
+- [ ] **Change Streams / Stream Processing:** push live scan progress to the frontend
+- [ ] `GET /scans`, `GET /scans/{id}`, `GET /search`; cache: skip the re-scan if the URL was scanned < 1h ago
 
 ## Dwan: frontend (`frontend/`)
-- [ ] URL input -> loading state -> report page
-- [ ] Score per category, findings grouped by severity, "how to fix" text from the agent
-- [ ] Scan history page (from Bogdan's endpoints)
+- [ ] URL input -> live progress (agent steps streaming in) -> report page
+- [ ] Scores per category, findings by severity, fix text + regulation quote
+- [ ] Scan history + search page (Bogdan's endpoints)
 - [ ] Use the mock `docs/example_scan.json` until the backend is ready
 - [ ] Make the demo look good: it's the first thing judges see
 
-## Bogdan: MongoDB (`backend/db`)
-- [ ] MongoDB Atlas free cluster; share the connection string privately (NOT in git)
-- [ ] Collections: `scans` (full result), `sites` (url, last score), `labels` (ML training data)
-- [ ] Functions: save_scan, get_scan, list_scans, save_label
-- [ ] `GET /scans` and `GET /scans/{id}` endpoints
-- [ ] Index on url + created_at; cache: skip the re-scan if the same URL was scanned < 1h ago
-
 ## Sunday morning, everyone
 - [ ] Freeze features at 10:00; bug fixes only after that
-- [ ] Record a backup demo video in case the wifi dies
-- [ ] Pitch: the problem (public-sector sites are legally required to comply) -> live demo -> our model's metrics -> next steps
+- [ ] Record a backup demo video
+- [ ] One pitch, with a slide per track: agent does a real job / Gemini / Atlas features used / Saint demo
+- [ ] Submit to every track separately before the deadline
