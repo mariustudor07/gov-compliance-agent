@@ -148,7 +148,7 @@ The 9 labels the classifier uses: `controller` (who runs the site), `purpose` (w
 `lawful_basis`, `rights` (access, deletion…), `retention` (how long it's kept), `contact_dpo`,
 `third_parties` (who it's shared with), `complaints_ico` (right to complain to the ICO), `other`.
 
-### 🔍 Rolef: scanner + Saint: `backend/scanner/`
+### 🔍 Rolef: scanner: `backend/scanner/`
 **Your job: be the auditor. Open the site and collect hard evidence of what's wrong.**
 
 | # | Task | File | Done when |
@@ -159,7 +159,6 @@ The 9 labels the classifier uses: `controller` (who runs the site), `purpose` (w
 | 4 | Accessibility: run axe-core on each page, turn violations into findings | `accessibility.py` | findings list WCAG problems with counts |
 | 5 | Accessibility: finding if there's no accessibility statement page | `accessibility.py` | |
 | 6 | Security: headers (started), plus mixed content + TLS version | `security.py` | http-only site gets a critical finding |
-| 7 | **Saint track:** read the Saint brief; make Saint use GovCheck (e.g. "watch my council's site and message me if it stops being compliant") | new file, e.g. `backend/integrations/saint.py` | a 30-second demo of Saint doing it |
 
 Rule for every finding: **always include `evidence`** (what exactly you saw: cookie names, header
 values, element counts). Evidence is what makes this look like a forensics tool and not a guess.
@@ -325,14 +324,14 @@ Never commit: `.env`, API keys, the Mongo connection string, `.venv/`, `node_mod
 |---|---|
 | **Fri afternoon** | Everyone set up. Scanner finds pages + cookies. Frontend shows the fake report. Atlas cluster up. Gemini says hello. |
 | **Fri night** | Rest. Backend already scans end to end; classifier trained (72% vs 63% baseline). |
-| **Sat daytime** | Label review. Frontend calls the real API. Scans saved in Atlas. Saint brief read. |
+| **Sat daytime** | Label review. Frontend calls the real API. Scans saved in Atlas. |
 | **Sat ~19:00: CHECKPOINT** 🚩 | **Rough but working** demo: URL in → real findings on screen. No polish needed. Show what each person built. |
-| **Sat night** | After the checkpoint: Vector Search over the laws, Gemini (if we have a key), Saint, start polishing. Test on 5 sites. |
+| **Sat night** | After the checkpoint: Vector Search over the laws, Gemini (if we have a key), start polishing. Test on 5 sites. |
 | **Sun 10:00** | 🧊 **Feature freeze.** Bugs only. Record the backup demo video. Build the pitch. |
 | **Sun** | Submit to every track separately. Pitch. |
 
 **Pitch outline (3 min):** the problem (public-sector sites are legally required to comply and many
-don't) → live demo on a real site → "our own model" slide with metrics → how we use Gemini, Atlas and Saint → what's next.
+don't) → live demo on a real site → "our own model" slide with metrics → how we use Gemini and Atlas → what's next.
 
 ---
 
@@ -343,6 +342,4 @@ don't) → live demo on a real site → "our own model" slide with metrics → h
 | **Agents That Ship** (main) | Does a real job end to end: audit → evidence → report → fixes | everyone |
 | **Google DeepMind: Gemini 4 Argon** | Gemini is the agent's brain, calling tools to look up the law | AI lead |
 | **MongoDB Atlas** | Atlas is the core store + Vector Search, Atlas Search, Voyage AI embeddings | Bogdan |
-| **Saint** | Saint watches sites for the user and reports compliance changes | Rolef |
-
 Read every track's full brief: each one has its own judging criteria and submission form.
