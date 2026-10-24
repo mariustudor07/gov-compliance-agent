@@ -1,4 +1,6 @@
 """WCAG 2.2 AA checks using axe-core, plus the legally required accessibility statement."""
+import inspect
+
 from .findings import finding
 
 AXE_URL = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.2/axe.min.js"
@@ -14,7 +16,12 @@ def run_axe(page):
     Returns axe violations, or None if axe couldn't run on this page."""
     try:
         page.add_script_tag(url=AXE_URL)
-        return page.evaluate("async () => (await axe.run(document, {runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']})).violations")
+        script = "async () => (await axe.run(document, {runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']})).violations"
+        if "isolated_context" in inspect.signature(page.evaluate).parameters:
+            # Scrapling's stealth browser (patchright) runs evaluate() in a hidden world by default,
+            # where the axe we just injected into the page isn't visible.
+            return page.evaluate(script, isolated_context=False)
+        return page.evaluate(script)
     except Exception as e:
         # Some sites block injected scripts with their CSP.
         print(f"axe failed on {page.url}: {e}")

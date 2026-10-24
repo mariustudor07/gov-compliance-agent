@@ -97,7 +97,7 @@ gov-compliance-agent/
 │   │
 │   ├── scanner/                  ── ROLEF
 │   │   ├── scan.py               ← run_scan(url): runs everything below, returns findings
-│   │   ├── crawler.py            ← opens the site in Chromium, finds privacy/cookie/a11y pages
+│   │   ├── crawler.py            ← opens the site with Scrapling, finds privacy/cookie/a11y pages (links + sitemap)
 │   │   ├── cookies.py            ← PECR checks
 │   │   ├── accessibility.py      ← axe-core / WCAG checks
 │   │   ├── security.py           ← HTTPS + security header checks
@@ -275,8 +275,10 @@ Already installed on the AI lead's laptop: Python 3.12, Git, GitHub CLI, Node. T
    ```
    cd backend
    pip install -r requirements.txt
+   scrapling install
    python -m playwright install chromium
    ```
+   `scrapling install` downloads the browser the scanner uses; the Playwright one is for `ml/evaluate_documents.py`.
 6. **Secrets**: copy `.env.example` to `.env` (in the project root) and fill in the keys you have.
    Leave `MOCK_SCAN=1` until the real pipeline works.
 7. **Try the scanner** (no API needed): open `backend/try_scan.py` → right-click → Run. Edit the

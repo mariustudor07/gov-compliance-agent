@@ -11,3 +11,4 @@ scikit-learn
 pandas
 joblib
 sentence-transformers
+scrapling[fetchers]>=0.5
