@@ -63,8 +63,40 @@ AXE_FIXES = {
 }
 
 
+# Why each finding got its severity (shown in the report as "Why critical/high/...").
+SEVERITY_REASONS = {
+    "ck-preconsent": "Tracking starts before the visitor can say no, so PECR consent is never actually given.",
+    "sec-https": "Everything sent to the site, including logins and form data, can be read or changed in transit.",
+    "sec-strict-transport-security": "Without HSTS, an attacker on the same network can downgrade a visitor's first "
+                                     "request to unencrypted HTTP.",
+    "sec-content-security-policy": "CSP is a second line of defence against injected scripts (XSS). Strongly "
+                                   "recommended, but not a legal requirement on its own.",
+    "sec-x-content-type-options": "It only blocks a narrow class of browser content-sniffing attacks.",
+    "sec-clickjacking": "Another site could embed this one invisibly and trick users into clicking its buttons.",
+    "pv-none": "UK GDPR requires this information whenever personal data is collected; without a notice, "
+               "nothing else can be checked.",
+}
+CLAUSE_REASON = ("UK GDPR Article 13 lists this as information people must be given when their data is "
+                 "collected, so leaving it out is a direct breach.")
+AXE_REASONS = {
+    "color-contrast": "Low-contrast text is hard to read for people with low vision or colour blindness, "
+                      "and for anyone in bright light.",
+    "button-name": "Screen readers announce this as just 'button', so blind users can't tell what it does.",
+    "image-alt": "Screen-reader users get no description of the image, or hear the file name read out.",
+    "link-name": "Screen-reader users can't tell where the link goes.",
+    "label": "Screen-reader users can't tell what to type into the field.",
+    "html-has-lang": "Screen readers may read the page in the wrong language and accent.",
+}
+AXE_SEVERITY_REASONS = {
+    "critical": "It blocks some disabled users from using this part of the site at all.",
+    "high": "It makes this content very hard to use for some disabled users.",
+    "medium": "It causes friction for some users, but they can usually still complete the task.",
+    "low": "The impact on users is minor.",
+}
+
+
 def apply_fixes(findings):
-    """Fill in regulation and fix for every non-pass finding that doesn't have one yet."""
+    """Fill in regulation, fix and severity_reason for every non-pass finding that doesn't have them yet."""
     for f in findings:
         if f["severity"] == "pass":
             continue
@@ -72,10 +104,13 @@ def apply_fixes(findings):
             rule = f["id"][len("a11y-"):].rsplit("-", 1)[0]
             regulation = "WCAG 2.2 AA (Public Sector Bodies Accessibility Regulations 2018)"
             fix = AXE_FIXES.get(rule, "Fix the elements listed in the evidence so they meet WCAG 2.2 AA.")
+            reason = AXE_REASONS.get(rule) or AXE_SEVERITY_REASONS.get(f["severity"], "")
         else:
             regulation, fix = FIXES.get(f["id"], ("", ""))
+            reason = SEVERITY_REASONS.get(f["id"]) or (CLAUSE_REASON if f["id"].startswith("pv-") else "")
         f["regulation"] = regulation or f["regulation"]  # the library's citation is more specific
         f["fix"] = f["fix"] or fix
+        f["severity_reason"] = f.get("severity_reason") or reason
     return findings
 
 

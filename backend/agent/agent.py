@@ -82,4 +82,5 @@ def _explain_with_gemini(url, findings):
         if f:
             f["fix"] = item.get("fix") or f["fix"]
             f["regulation"] = item.get("regulation") or f["regulation"]
+            f["severity_reason"] = item.get("severity_reason") or f.get("severity_reason", "")
     return answer.get("summary", "")

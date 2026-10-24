@@ -250,6 +250,14 @@ const report = await res.json();
 
 ---
 
+## Quick start: run the demo
+
+After setup (section 6), **double-click `start.bat`** in the project folder. It opens two windows
+(the API and the website) and then the app in your browser at http://localhost:5173.
+Close the two windows to stop it. Set `MOCK_SCAN=0` in `.env` for real scans.
+
+---
+
 ## 6. Setup (PyCharm, step by step)
 
 Already installed on the AI lead's laptop: Python 3.12, Git, GitHub CLI, Node. Teammates: install
