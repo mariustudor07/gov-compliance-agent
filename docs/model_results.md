@@ -127,6 +127,37 @@ the truth column was judged by an AI assistant and needs a human spot-check.
 - Still open: policies inside collapsed sections (e.g. Autotrader) only show headings, because the
   scanner reads visible text.
 
+### Large-scale test: 233 UK homepages, end to end
+
+`python -m ml.evaluate_documents sites`: the app's own policy-finding plus the model, on the homepages in
+`data/test_sites.txt` (councils, NHS, universities, retail, banks, utilities, media, charities, food;
+none used for training). Results: `data/doc_eval_sites.csv`.
+
+**Coverage:** 165 of 233 sites (71%) gave a readable privacy notice. The rest mostly block automated
+browsers (e.g. Tesco "Access Denied", Birmingham council 403, UCL Cloudflare). The app now reports
+"couldn't scan" for those instead of fake failures.
+
+**Accuracy** (1,320 decisions; checking all 1,320 by hand wasn't feasible, so):
+- All 38 "missing" flags where a strict search found possible proof were judged one by one: 20 false
+  alarms (mostly headings/links like "How long we keep your data"), 17 real gaps, 1 unclear.
+- A random sample of 25 of the other 223 flags: 20 real gaps, 2 false alarms, 3 unclear.
+- A random sample of 40 "present" decisions: 39 correct, 1 unclear.
+
+| Estimate | |
+|---|---|
+| "Missing" flags that are real gaps (on the page read) | ~84% |
+| "Present" decisions that are correct | ~97%+ |
+| **Overall** | **~95–97%** |
+
+Common real gap: many sites say they are *registered* with the ICO but never tell people they can
+*complain* to it, which Article 13 requires.
+
+**Weakest link now is finding the right page, not the model:** some sites were read via a Freedom of
+Information page, a single-service notice (e.g. body-worn cameras) or a short landing page that links to
+the full notice. Flags there are "correct for that page" but less useful. Fixed during this test: the
+scanner used to pick the longest page with "privacy" in the link (it chose news articles and cookie
+pages); `scanner/privacy_page.py` now scores pages by URL and legal content.
+
 **Possible next step:** add high-precision rules ("Information Commissioner", "data protection authority",
 "company/charity number") as a backstop for the two weak clauses. If we do, re-test on *new* policies,
 not these 20, so we don't tune to the test.
