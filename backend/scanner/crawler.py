@@ -9,6 +9,8 @@ from .accessibility import run_axe
 
 # Links whose URL or text contains one of these are worth visiting.
 KEYWORDS = ("privacy", "cookie", "accessibility", "data-protection")
+USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+              "Chrome/141.0.0.0 Safari/537.36")
 SHORT_PAGE_CHARS = 3000  # a privacy page shorter than this is probably a hub linking to the real policy
 
 
@@ -29,7 +31,10 @@ def crawl(url, max_pages=5):
     with sync_playwright() as p:
         browser = p.chromium.launch()
         # bypass_csp lets us inject axe-core; the real CSP header is still recorded for security checks.
-        context = browser.new_context(bypass_csp=True)
+        # A normal browser identity: bot protection (e.g. Cloudflare) blocks "HeadlessChrome" outright,
+        # which made 4 of 27 big UK sites show a "security verification" page instead of their policy.
+        context = browser.new_context(bypass_csp=True, user_agent=USER_AGENT, locale="en-GB",
+                                      viewport={"width": 1366, "height": 768})
         page = context.new_page()
 
         response = _goto(page, url)
@@ -97,5 +102,6 @@ def _snapshot(page, response):
         "html": page.content(),
         "text": page.inner_text("body"),
         "headers": response.all_headers() if response else {},
+        "status": response.status if response else 0,
         "axe_violations": run_axe(page),
     }

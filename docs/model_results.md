@@ -103,6 +103,30 @@ loaded pages, organisation named but no controller statement) were marked `uncle
 **The truth column was judged by an AI assistant (Claude) and still needs a human spot-check**,
 especially the 6 disagreements and 8 unclear rows.
 
+### Held-out test: 15 policies the model never saw
+
+`python -m ml.evaluate_documents new` runs the final model on policies listed in `data/test_policies.txt`
+(none used for training), fetched in a real browser exactly like the app. Results: `data/doc_eval_new.csv`.
+
+| | |
+|---|---|
+| Policies read (of 29 tried; the rest were dead links/404s, connection errors, or a cookie wall) | 15 |
+| Decisions checked (3 marked "unclear" and excluded) | 114 |
+| **Correct** | **110 (96.5%)** |
+| Real gaps correctly flagged | 6 of 7 |
+| False alarms | 3 |
+
+Small print: only 7 real gaps in this set, so the gap numbers are a small sample. Same caveat as above:
+the truth column was judged by an AI assistant and needs a human spot-check.
+
+**What this test found in the scanner (now fixed):**
+- Bot protection blocked the headless browser on 4 big UK sites ("Performing security verification").
+  The scanner now uses a normal browser identity, and Oxford, Autotrader, Camden and Mind load.
+- Some "page not found" (404) pages contain enough menu text to look like a policy. The scanner now
+  ignores error pages when choosing the privacy notice.
+- Still open: policies inside collapsed sections (e.g. Autotrader) only show headings, because the
+  scanner reads visible text.
+
 **Possible next step:** add high-precision rules ("Information Commissioner", "data protection authority",
 "company/charity number") as a backstop for the two weak clauses. If we do, re-test on *new* policies,
 not these 20, so we don't tune to the test.
