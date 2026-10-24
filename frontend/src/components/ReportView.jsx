@@ -27,6 +27,9 @@ export default function ReportView({ result, usingMock = false }) {
           <p className="report__meta">Scanned {formatDate(scanned_at)}</p>
         </div>
         <div className="banner">{summary}</div>
+        {findings.map((f) => (
+          <FindingCard key={f.id} finding={f} />
+        ))}
       </div>
     );
   }

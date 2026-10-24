@@ -12,6 +12,7 @@ from scanner.findings import finding
 from scanner.scan import run_scan
 
 from .banner import check_banner
+from .fallback import privacy_via_gemini
 from .fixes import apply_fixes, summarise
 from .prompts import CLAUSE_TITLES, SYSTEM_PROMPT
 from .scoring import score
@@ -20,16 +21,29 @@ from .scoring import score
 def analyse(url):
     scan = run_scan(url)
     if scan["blocked"]:
-        # Honest "couldn't scan" result: no scores, no findings, so we never blame a site for its bot protection.
+        # Honest "couldn't scan" result: we never blame a site for its bot protection. If Gemini is
+        # available it reads the privacy notice via Google, so at least that section gets checked.
+        fallback = privacy_via_gemini(url)
+        summary = (f"We couldn't scan this site: {scan['blocked']}. Many large sites block automated "
+                   "tools, so this says nothing about whether the site is compliant.")
+        findings, scores = [], {}
+        if fallback:
+            privacy_url, findings = fallback
+            findings = apply_fixes(findings)
+            scores = {"privacy": score(findings)["privacy"]}
+            summary += (" Instead, Gemini read the privacy notice through Google and our classifier checked "
+                        "what it found, so only the privacy section is covered. Cookies, accessibility and "
+                        "security need a manual check.")
+        else:
+            summary += " It needs a manual check."
         return {
             "url": url,
             "scanned_at": datetime.now(timezone.utc).isoformat(),
             "pages_crawled": scan["pages_crawled"],
             "blocked": True,
-            "scores": {},
-            "findings": [],
-            "summary": (f"We couldn't scan this site: {scan['blocked']}. Many large sites block automated "
-                        "tools, so this says nothing about whether the site is compliant. It needs a manual check."),
+            "scores": scores,
+            "findings": findings,
+            "summary": summary,
         }
     banner = check_banner(scan["homepage_screenshot"], scan["pages_crawled"][0])
     scanner_findings = scan["findings"]

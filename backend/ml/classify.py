@@ -46,6 +46,17 @@ def classify_sentences(text):
     return results
 
 
+def clause_probability(sentence, clause):
+    """How likely our model thinks this one sentence is about `clause` (0-1).
+    Used to double-check quotes Gemini brings back from sites that block our scanner."""
+    model = _load()
+    if model is None:
+        return 1.0 if keywords.predict(sentence) == clause else 0.0
+    probs = model.predict_proba([sentence])[0]
+    classes = list(model.classes_)
+    return float(probs[classes.index(clause)]) if clause in classes else 0.0
+
+
 def missing_clauses(text):
     """Which required clauses the privacy policy doesn't seem to contain."""
     found = {r["label"] for r in classify_sentences(text) if r["confidence"] >= MIN_CONFIDENCE}
