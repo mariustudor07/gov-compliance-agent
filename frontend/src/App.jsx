@@ -6,6 +6,7 @@ import Report from "./pages/Report";
 import ReportById from "./pages/ReportById";
 import History from "./pages/History";
 import Docs from "./pages/Docs";
+import Privacy from "./pages/Privacy";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/report/:id" element={<ReportById />} />
           <Route path="/history" element={<History />} />
           <Route path="/docs" element={<Docs />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </main>
       <Footer />

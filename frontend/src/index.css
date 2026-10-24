@@ -1313,6 +1313,65 @@ h3 {
   margin: 28px 0 10px;
 }
 
+/* ---------- plain policy / prose pages ---------- */
+
+.prose-section {
+  margin: 28px 0;
+}
+
+.prose-section h2 {
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.prose-section p {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+  margin: 0 0 12px;
+}
+
+.prose-section p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-section ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.prose-section li {
+  margin-bottom: 6px;
+}
+
+.prose-section strong {
+  color: var(--text);
+}
+
+.prose-section a {
+  color: var(--brand);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+}
+
+.prose-section a:hover {
+  text-decoration-color: var(--brand-soft);
+}
+
+.prose-section code {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.85em;
+}
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 720px) {
