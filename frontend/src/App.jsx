@@ -16,6 +16,9 @@ export default function App() {
         <span />
         <span />
       </div>
+      <div className="bg-shapes-wrap" aria-hidden="true">
+        <div className="bg-shapes" />
+      </div>
       <Nav />
       <main className="page">
         <Routes>

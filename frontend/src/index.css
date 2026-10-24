@@ -52,7 +52,10 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  /* Deliberately no background here: :root (html) already paints the white
+     canvas. If body also painted one, its own box (a normal in-flow
+     descendant) would paint *after* the fixed, z-index:-1 background layers
+     in the stacking order, hiding them completely. */
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -77,8 +80,8 @@ body {
   min-width: 320px;
   min-height: 320px;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.3;
+  filter: blur(100px);
+  opacity: 0.12;
   will-change: transform;
 }
 
@@ -100,7 +103,7 @@ body {
   background: #b45309;
   bottom: -14%;
   left: 18%;
-  opacity: 0.22;
+  opacity: 0.09;
   animation: drift3 22s ease-in-out infinite;
 }
 
@@ -148,6 +151,40 @@ body {
   }
   50% {
     transform: translate(-6vw, -3vh) scale(1.1);
+  }
+}
+
+/* A tiled pattern of small shapes (one per compliance category: circle,
+   cross, diamond, hexagon), panning diagonally in a seamless loop. The
+   outer wrapper clips an oversized, offset tile so the animated `transform`
+   never reveals an edge. */
+.bg-shapes-wrap {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.bg-shapes {
+  position: absolute;
+  top: -150px;
+  left: -150px;
+  width: calc(100% + 300px);
+  height: calc(100% + 300px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Ccircle cx='28' cy='32' r='7' fill='%232563eb' fill-opacity='0.04' stroke='%232563eb' stroke-opacity='0.14' stroke-width='1.5'/%3E%3Cpath d='M108 20 L124 20 M116 12 L116 28' stroke='%237c3aed' stroke-opacity='0.14' stroke-width='1.6' stroke-linecap='round'/%3E%3Crect x='22' y='106' width='15' height='15' fill='%23b45309' fill-opacity='0.04' stroke='%23b45309' stroke-opacity='0.14' stroke-width='1.5' transform='rotate(45 29.5 113.5)'/%3E%3Cpath d='M118 100 l8 4.6 l0 9.2 l-8 4.6 l-8 -4.6 l0 -9.2 z' fill='%23059669' fill-opacity='0.04' stroke='%23059669' stroke-opacity='0.14' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 150px 150px;
+  animation: shapes-pan 55s linear infinite;
+  will-change: transform;
+}
+
+@keyframes shapes-pan {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-150px, -150px);
   }
 }
 
