@@ -20,7 +20,7 @@ def crawl(url, max_pages=5):
 
     Returns:
         {
-          "pages": [{"url", "html", "text", "headers", "axe_violations"}, ...],
+          "pages": [{"url", "html", "text", "headers", "status", "frames_html", "axe_violations"}, ...],
           "cookies_before_consent": [ {name, domain, ...}, ... ],
         }
     """
@@ -34,8 +34,9 @@ def crawl(url, max_pages=5):
         # bypass_csp lets us inject axe-core; the real CSP header is still recorded for security checks.
         # A normal browser identity: bot protection (e.g. Cloudflare) blocks "HeadlessChrome" outright,
         # which made 4 of 27 big UK sites show a "security verification" page instead of their policy.
-        context = browser.new_context(bypass_csp=True, user_agent=USER_AGENT, locale="en-GB",
-                                      viewport={"width": 1366, "height": 768})
+        # ignore_https_errors lets us audit sites with a bad certificate; security.py reports the certificate.
+        context = browser.new_context(bypass_csp=True, ignore_https_errors=True, user_agent=USER_AGENT,
+                                      locale="en-GB", viewport={"width": 1366, "height": 768})
         page = context.new_page()
 
         response = _goto(page, url)
@@ -109,5 +110,17 @@ def _snapshot(page, response):
         "text": page.inner_text("body"),
         "headers": response.all_headers() if response else {},
         "status": response.status if response else 0,
+        "frames_html": _frames_html(page),
         "axe_violations": run_axe(page),
     }
+
+
+def _frames_html(page):
+    """HTML of the page's iframes: some consent tools (e.g. Sourcepoint) draw the banner in one."""
+    frames = []
+    for frame in page.frames[1:]:
+        try:
+            frames.append(frame.content())
+        except Exception:
+            pass  # frame navigated away or is cross-origin and gone
+    return frames
