@@ -1,8 +1,11 @@
 """Step 2 of our own model: train a privacy-clause classifier on data/labels.csv.
 
-Model: TF-IDF features from words AND character patterns (which catch spelling variants like
-"retain/retention/retained"), fed into a linear SVM. Calibration on top gives a confidence
-score per prediction, which classify.py uses.
+Model: three kinds of features, fed into a linear SVM:
+  - TF-IDF on words (1-3 word phrases)
+  - TF-IDF on character patterns (catch spelling variants like "retain/retention/retained")
+  - sentence embeddings from a small pretrained model (meaning, not just words; see features.py)
+Calibration on top gives a confidence score per prediction, which classify.py uses.
+Settings (C=0.5, embedding weight 2) were chosen by cross-validation.
 
 Evaluation: 5-fold cross-validation. Every real sentence is tested exactly once by a model
 that never saw it. That gives fairer numbers than one random split on a small dataset.
@@ -24,6 +27,7 @@ from sklearn.pipeline import make_pipeline, make_union
 from sklearn.svm import LinearSVC
 
 from ml import keywords
+from ml.features import SentenceEmbeddings
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 MODEL = DATA / "clause_model.joblib"
@@ -31,10 +35,12 @@ MODEL = DATA / "clause_model.joblib"
 
 def new_model():
     features = make_union(
-        TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True),
+        TfidfVectorizer(ngram_range=(1, 3), sublinear_tf=True),
         TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), sublinear_tf=True),
+        SentenceEmbeddings(),
     )
-    return make_pipeline(features, CalibratedClassifierCV(LinearSVC(class_weight="balanced"), cv=3))
+    classifier = LinearSVC(C=0.5, class_weight="balanced")
+    return make_pipeline(features, CalibratedClassifierCV(classifier, cv=3))
 
 
 def cross_validate(real, synthetic=None):

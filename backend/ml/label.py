@@ -34,7 +34,11 @@ LABEL_GUIDE = {
     "contact_dpo": "how to contact the organisation or its Data Protection Officer about data",
     "third_parties": "who data is shared with, sold to, or transferred to (including outside the UK)",
     "complaints_ico": "the right to complain to the ICO (Information Commissioner's Office)",
-    "other": "anything else: cookies detail, definitions, navigation text, general statements",
+    "data_collected": "what personal data is collected or held (name, email, IP address, location, ...)",
+    "cookies": "cookies and similar tracking technology: what they are, which are used, how to control them",
+    "security": "how personal data is kept safe (encryption, access controls, safeguards)",
+    "automated_decisions": "automated decision-making or profiling about people",
+    "other": "anything else: page titles, navigation text, definitions, general statements",
 }
 LABELS = list(LABEL_GUIDE)
 

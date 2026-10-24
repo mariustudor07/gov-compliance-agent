@@ -6,9 +6,13 @@ from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright
 
 from .accessibility import run_axe
+from .privacy_page import link_rank
 
 # Links whose URL or text contains one of these are worth visiting.
 KEYWORDS = ("privacy", "cookie", "accessibility", "data-protection")
+USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+              "Chrome/141.0.0.0 Safari/537.36")
+SHORT_PAGE_CHARS = 3000  # a privacy page shorter than this is probably a hub linking to the real policy
 
 
 def crawl(url, max_pages=5):
@@ -16,7 +20,7 @@ def crawl(url, max_pages=5):
 
     Returns:
         {
-          "pages": [{"url", "html", "text", "headers", "frames_html", "axe_violations"}, ...],
+          "pages": [{"url", "html", "text", "headers", "status", "frames_html", "axe_violations"}, ...],
           "cookies_before_consent": [ {name, domain, ...}, ... ],
         }
     """
@@ -28,33 +32,64 @@ def crawl(url, max_pages=5):
     with sync_playwright() as p:
         browser = p.chromium.launch()
         # bypass_csp lets us inject axe-core; the real CSP header is still recorded for security checks.
+        # A normal browser identity: bot protection (e.g. Cloudflare) blocks "HeadlessChrome" outright,
+        # which made 4 of 27 big UK sites show a "security verification" page instead of their policy.
         # ignore_https_errors lets us audit sites with a bad certificate; security.py reports the certificate.
-        context = browser.new_context(bypass_csp=True, ignore_https_errors=True)
+        context = browser.new_context(bypass_csp=True, ignore_https_errors=True, user_agent=USER_AGENT,
+                                      locale="en-GB", viewport={"width": 1366, "height": 768})
         page = context.new_page()
 
         response = _goto(page, url)
         # Nothing has been clicked yet, so every cookie here was set without consent.
         cookies_before_consent = context.cookies()
+        homepage_screenshot = page.screenshot()  # what a first-time visitor sees, cookie banner included
         pages.append(_snapshot(page, response))
 
         host = urlparse(page.url).netloc
-        links = page.eval_on_selector_all("a[href]", "els => els.map(e => [e.href, e.innerText])")
-        wanted = []
-        for href, label in links:
-            text = (href + " " + label).lower()
-            if urlparse(href).netloc == host and any(k in text for k in KEYWORDS) and href not in wanted:
-                wanted.append(href)
+        # Proper "privacy notice/policy" links first, cookie/news links last (stable: keeps page order otherwise).
+        wanted = sorted(_matching_links(page, host, KEYWORDS), key=link_rank)
+        visited = {page.url}
 
         for href in wanted[: max_pages - 1]:
             try:
                 response = _goto(page, href)
                 pages.append(_snapshot(page, response))
+                visited.add(page.url)
             except Exception as e:
                 print(f"Could not open {href}: {e}")
+                continue
+            # Many sites link to a short privacy "hub" page that links on to the real policy.
+            # Follow those links one level deeper so we read the actual notice.
+            if "privacy" in page.url.lower() and len(pages[-1]["text"]) < SHORT_PAGE_CHARS:
+                deeper = sorted((h for h in _matching_links(page, host, ("privacy",)) if h not in visited), key=link_rank)
+                for deep in deeper[:2]:
+                    try:
+                        response = _goto(page, deep)
+                        pages.append(_snapshot(page, response))
+                        visited.add(page.url)
+                    except Exception as e:
+                        print(f"Could not open {deep}: {e}")
 
         browser.close()
 
-    return {"pages": pages, "cookies_before_consent": cookies_before_consent}
+    return {"pages": pages, "cookies_before_consent": cookies_before_consent,
+            "homepage_screenshot": homepage_screenshot}
+
+
+def _matching_links(page, host, keywords):
+    """Same-site links whose URL or text contains one of the keywords, in page order, no duplicates."""
+    # SVG links have an object as href (with .baseVal), not a string; that crashed the scan on cam.ac.uk.
+    links = page.eval_on_selector_all(
+        "a[href]", "els => els.map(e => [typeof e.href === 'string' ? e.href : (e.href && e.href.baseVal) || '', e.innerText || ''])")
+    found = []
+    for href, label in links:
+        if not href.startswith("http"):
+            continue
+        href = href.split("#")[0]
+        text = (href + " " + label).lower()
+        if urlparse(href).netloc == host and any(k in text for k in keywords) and href not in found:
+            found.append(href)
+    return found
 
 
 def _goto(page, url):
@@ -74,6 +109,7 @@ def _snapshot(page, response):
         "html": page.content(),
         "text": page.inner_text("body"),
         "headers": response.all_headers() if response else {},
+        "status": response.status if response else 0,
         "frames_html": _frames_html(page),
         "axe_violations": run_axe(page),
     }

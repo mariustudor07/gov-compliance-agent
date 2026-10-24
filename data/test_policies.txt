@@ -1,0 +1,31 @@
+# Held-out test set: privacy policies NOT used for training (none of these appear in labels.csv).
+# Used by: python -m ml.evaluate_documents new
+https://www.gov.uk/government/publications/dvla-privacy-policy/dvla-privacy-policy
+https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you
+https://www.gov.uk/government/organisations/department-for-education/about/personal-information-charter
+https://www.gov.uk/government/organisations/home-office/about/personal-information-charter
+https://www.camden.gov.uk/privacy-notice
+https://www.leeds.gov.uk/privacy-and-data/privacy-notice
+https://www.ox.ac.uk/privacy-policy
+https://www.imperial.ac.uk/privacy/
+https://www.johnlewis.com/customer-services/shopping-with-us/privacy-notice
+https://www.thetrainline.com/privacy-policy
+https://uk.gymshark.com/pages/privacy-policy
+https://www.boots.com/privacypolicy
+https://www.ovoenergy.com/privacy-policy
+https://www.virginmedia.com/legal/privacy
+https://www.linkedin.com/legal/privacy-policy
+https://www.oxfam.org.uk/privacy/
+https://www.macmillan.org.uk/terms-and-conditions/privacy-policy
+https://www.shelter.org.uk/privacy-policy
+https://www.mind.org.uk/privacy-policy/
+https://www.bhf.org.uk/what-we-do/our-policies/privacy-policy
+https://www.nationwide.co.uk/privacy/
+https://www.ocado.com/webshop/content/privacy
+https://www.waitrose.com/ecom/content/legal/privacy-notice
+https://www.channel4.com/4viewers/privacy-policy
+https://www.ucas.com/about-us/policies/privacy-policies-and-declarations/ucas-privacy-policy
+https://www.rightmove.co.uk/this-site/privacy-policy.html
+https://www.autotrader.co.uk/privacy-notice
+https://www.justgiving.com/info/privacy
+https://www.duolingo.com/privacy

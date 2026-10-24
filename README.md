@@ -41,7 +41,7 @@ writes a report: what's wrong, how bad it is, which regulation it breaks, and ho
 ```
  ┌──────────────┐  POST /scan {url}   ┌──────────────────────────────────────────────────────┐
  │   Frontend   │ ──────────────────► │  API  (backend/api/main.py, FastAPI)                 │
- │   (Dwan)     │ ◄────────────────── │                                                      │
+ │   (Dawan)    │ ◄────────────────── │                                                      │
  └──────────────┘   ScanResult JSON   │  1. db: scanned this URL in the last hour? → return  │
                                       │  2. agent.analyse(url):                              │
                                       │       a. scanner.run_scan(url)        ← Rolef        │
@@ -141,7 +141,7 @@ If you need something changed in someone else's file, tell them.
 | 5 | `missing_clauses(text)` returns which required clauses are missing | `ml/classify.py` | try it on a gov.uk privacy page → few missing |
 | 6 | Gemini explains each finding + quotes the law via `search_regulations` | `agent/agent.py`, `agent/prompts.py` | findings have `fix` and `regulation` filled in |
 | 7 | Tune scoring so a gov.uk page scores high, a random site scores lower | `agent/scoring.py` | numbers feel fair |
-| 8 | Wire the API, turn off mock mode | `api/main.py` | Dwan's frontend shows a real scan |
+| 8 | Wire the API, turn off mock mode | `api/main.py` | Dawan's frontend shows a real scan |
 | 9 | *Stretch:* fine-tune DistilBERT and compare with the baseline | `ml/` | better numbers in `docs/model_results.md` |
 
 The 9 labels the classifier uses: `controller` (who runs the site), `purpose` (why data is collected),
@@ -164,7 +164,7 @@ The 9 labels the classifier uses: `controller` (who runs the site), `purpose` (w
 Rule for every finding: **always include `evidence`** (what exactly you saw: cookie names, header
 values, element counts). Evidence is what makes this look like a forensics tool and not a guess.
 
-### 🎨 Dwan: frontend: `frontend/`
+### 🎨 Dawan: frontend: `frontend/`
 **Your job: make it usable and make the demo look great. Judges see this first.**
 
 | # | Task | Done when |
@@ -230,7 +230,7 @@ The backend also has a mock mode (`MOCK_SCAN=1` in `.env`) that returns that fil
 | Bogdan | `db.repository.save_scan(result)` | the new scan's id (string) |
 | Bogdan | `db.repository.get_scan(id)` / `list_scans()` / `find_recent_scan(url)` | scan dict(s) or `None` |
 
-### HTTP API (for Dwan). Runs at `http://127.0.0.1:8000`; interactive docs at `/docs`
+### HTTP API (for Dawan). Runs at `http://127.0.0.1:8000`; interactive docs at `/docs`
 | Method | Path | Body | Returns |
 |---|---|---|---|
 | `POST` | `/scan` | `{"url": "https://..."}` | `ScanResult` |
@@ -247,6 +247,14 @@ const res = await fetch("http://127.0.0.1:8000/scan", {
 });
 const report = await res.json();
 ```
+
+---
+
+## Quick start: run the demo
+
+After setup (section 6), **double-click `start.bat`** in the project folder. It opens two windows
+(the API and the website) and then the app in your browser at http://localhost:5173.
+Close the two windows to stop it. Set `MOCK_SCAN=0` in `.env` for real scans.
 
 ---
 
@@ -316,9 +324,10 @@ Never commit: `.env`, API keys, the Mongo connection string, `.venv/`, `node_mod
 | When | Goal |
 |---|---|
 | **Fri afternoon** | Everyone set up. Scanner finds pages + cookies. Frontend shows the fake report. Atlas cluster up. Gemini says hello. |
-| **Fri night** | First **end-to-end** scan: URL in frontend → real findings on screen (even if ugly). |
-| **Sat** | The real features: classifier trained, axe-core, Vector Search over the laws, agent writes fixes, frontend polished, Saint integration. |
-| **Sat night** | Test on the 5 chosen sites. Fix what breaks. |
+| **Fri night** | Rest. Backend already scans end to end; classifier trained (72% vs 63% baseline). |
+| **Sat daytime** | Label review. Frontend calls the real API. Scans saved in Atlas. Saint brief read. |
+| **Sat ~19:00: CHECKPOINT** 🚩 | **Rough but working** demo: URL in → real findings on screen. No polish needed. Show what each person built. |
+| **Sat night** | After the checkpoint: Vector Search over the laws, Gemini (if we have a key), Saint, start polishing. Test on 5 sites. |
 | **Sun 10:00** | 🧊 **Feature freeze.** Bugs only. Record the backup demo video. Build the pitch. |
 | **Sun** | Submit to every track separately. Pitch. |
 

@@ -21,6 +21,22 @@ def run_axe(page):
         return None
 
 
+# Plain-English titles for common axe rules; anything else uses axe's own wording.
+PLAIN_TITLES = {
+    "color-contrast": "Text with too little colour contrast to read easily",
+    "button-name": "Buttons with no label that screen readers can announce",
+    "image-alt": "Images with no text description",
+    "link-name": "Links with no text saying where they go",
+    "label": "Form fields with no label",
+    "html-has-lang": "Page doesn't declare its language",
+    "document-title": "Page has no title",
+    "heading-order": "Headings skip levels",
+    "region": "Content outside the page's main landmarks",
+    "landmark-one-main": "Page has no main content landmark",
+    "meta-viewport": "Zooming is disabled",
+}
+
+
 def check_accessibility(crawl_result):
     pages = crawl_result["pages"]
     findings = _axe_findings(pages)
@@ -29,7 +45,7 @@ def check_accessibility(crawl_result):
 
 
 def _axe_findings(pages):
-    """One finding per axe rule, merged across every page it appears on."""
+    """The same problem on several pages becomes ONE finding ("7 elements on 2 pages"), not one per page."""
     by_rule = {}
     for page in pages:
         for v in page["axe_violations"] or []:
@@ -40,13 +56,14 @@ def _axe_findings(pages):
 
     findings = []
     for rule_id, rule in by_rule.items():
-        v = rule["v"]
+        v, count = rule["v"], rule["elements"]
         example = v["nodes"][0]["html"][:200] if v["nodes"] else ""
         n_pages = len(rule["pages"])
+        where = f"{count} element{'s' if count != 1 else ''}" + (f" on {n_pages} pages" if n_pages > 1 else "")
         findings.append(finding(
             f"a11y-{rule_id}-{len(findings)}", "accessibility",
-            min(rule["impacts"], key=ORDER.index),
-            f"{v['help']} ({rule['elements']} element(s) on {n_pages} page(s))",
+            min(rule["impacts"], key=ORDER.index),  # the worst impact seen on any page
+            f"{PLAIN_TITLES.get(rule_id, v['help'])} ({where})",
             evidence=f"e.g. {example}" + (f" | also on: {', '.join(rule['pages'][1:])}" if n_pages > 1 else ""),
             page=rule["pages"][0], regulation="WCAG 2.2 AA"))
 

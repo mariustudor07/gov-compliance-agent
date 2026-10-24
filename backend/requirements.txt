@@ -10,3 +10,4 @@ voyageai
 scikit-learn
 pandas
 joblib
+sentence-transformers

@@ -11,6 +11,7 @@ Workflow to give Saint (paste into Saint):
     Every Monday at 9am, run GovCheck's watch on https://www.example.gov.uk.
     If the report starts with "CHANGED" or "NEW", email it to me with the subject
     "GovCheck: <site> compliance changed". If it starts with "NO CHANGE", do nothing.
+    If it starts with "COULDN'T SCAN" three weeks in a row, tell me the site needs a manual check.
 """
 import json
 import re
@@ -26,6 +27,10 @@ ORDER = ["critical", "high", "medium", "low", "pass"]
 def watch(url):
     """Scan url, compare with the previous scan of it, save this one. Returns the report text."""
     new = run_scan(url)
+    if new["blocked"]:
+        # Keep the last real scan: a bot-protection page says nothing about compliance.
+        return f"COULDN'T SCAN: {url}: {new['blocked']}. Nothing to compare this time."
+    new.pop("homepage_screenshot", None)  # PNG bytes, not JSON, and not needed for the diff
     path = WATCH_DIR / (re.sub(r"[^a-z0-9]+", "_", url.lower()).strip("_") + ".json")
     old = json.loads(path.read_text()) if path.exists() else None
 

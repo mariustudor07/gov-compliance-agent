@@ -9,6 +9,12 @@ FIXES = {
     "ck-preconsent": ("PECR reg. 6",
                       "Don't load analytics or advertising scripts until the user clicks Accept. Use a consent "
                       "manager that blocks these tags by default, and set only strictly necessary cookies on first load."),
+    "ck-banner-noreject": ("PECR reg. 6; ICO guidance on cookies",
+                           "Add a 'Reject all' button next to 'Accept all' on the first screen of the banner."),
+    "ck-banner-unequal": ("PECR reg. 6; ICO guidance on cookies",
+                          "Make 'Reject all' the same size, colour weight and position as 'Accept all'."),
+    "ck-banner-preticked": ("PECR reg. 6; UK GDPR Art. 4(11) (consent must be an active choice)",
+                            "Untick all non-essential cookie categories by default."),
     "sec-https": ("NCSC guidance: Using TLS to protect data",
                   "Serve the whole site over HTTPS with a valid certificate and redirect all http:// requests to https://."),
     "sec-strict-transport-security": ("NCSC guidance: Using TLS to protect data",
@@ -23,6 +29,9 @@ FIXES = {
                          "sites can't embed yours in a frame."),
     "pv-none": ("UK GDPR Art. 13",
                 "Publish a privacy notice and link to it from every page (usually in the footer)."),
+    "pv-short": ("UK GDPR Art. 12-13",
+                 "Make sure the full privacy notice is a normal web page (not a PDF or behind a script) and is "
+                 "linked clearly from every page, e.g. 'Privacy notice' in the footer."),
     "pv-controller": ("UK GDPR Art. 13(1)(a)",
                       "State the legal name and address of the organisation (or person) responsible for the data, "
                       "e.g. 'Example Ltd, 1 High Street, London, is the data controller.'"),
@@ -63,8 +72,46 @@ AXE_FIXES = {
 }
 
 
+# Why each finding got its severity (shown in the report as "Why critical/high/...").
+SEVERITY_REASONS = {
+    "ck-preconsent": "Tracking starts before the visitor can say no, so PECR consent is never actually given.",
+    "ck-banner-noreject": "If refusing takes more effort than accepting, consent isn't freely given, so it isn't valid.",
+    "ck-banner-unequal": "Nudging people towards 'Accept' with design undermines free choice, which the ICO "
+                         "treats as invalid consent.",
+    "ck-banner-preticked": "Pre-ticked boxes are not consent under UK GDPR; the user never actively agreed.",
+    "sec-https": "Everything sent to the site, including logins and form data, can be read or changed in transit.",
+    "sec-strict-transport-security": "Without HSTS, an attacker on the same network can downgrade a visitor's first "
+                                     "request to unencrypted HTTP.",
+    "sec-content-security-policy": "CSP is a second line of defence against injected scripts (XSS). Strongly "
+                                   "recommended, but not a legal requirement on its own.",
+    "sec-x-content-type-options": "It only blocks a narrow class of browser content-sniffing attacks.",
+    "sec-clickjacking": "Another site could embed this one invisibly and trick users into clicking its buttons.",
+    "pv-short": "We couldn't read a full notice, so we can't confirm the required information is there. "
+                "If we can't find it, visitors may not either.",
+    "pv-none": "UK GDPR requires this information whenever personal data is collected; without a notice, "
+               "nothing else can be checked.",
+}
+CLAUSE_REASON = ("UK GDPR Article 13 lists this as information people must be given when their data is "
+                 "collected, so leaving it out is a direct breach.")
+AXE_REASONS = {
+    "color-contrast": "Low-contrast text is hard to read for people with low vision or colour blindness, "
+                      "and for anyone in bright light.",
+    "button-name": "Screen readers announce this as just 'button', so blind users can't tell what it does.",
+    "image-alt": "Screen-reader users get no description of the image, or hear the file name read out.",
+    "link-name": "Screen-reader users can't tell where the link goes.",
+    "label": "Screen-reader users can't tell what to type into the field.",
+    "html-has-lang": "Screen readers may read the page in the wrong language and accent.",
+}
+AXE_SEVERITY_REASONS = {
+    "critical": "It blocks some disabled users from using this part of the site at all.",
+    "high": "It makes this content very hard to use for some disabled users.",
+    "medium": "It causes friction for some users, but they can usually still complete the task.",
+    "low": "The impact on users is minor.",
+}
+
+
 def apply_fixes(findings):
-    """Fill in regulation and fix for every non-pass finding that doesn't have one yet."""
+    """Fill in regulation, fix and severity_reason for every non-pass finding that doesn't have them yet."""
     for f in findings:
         if f["severity"] == "pass":
             continue
@@ -72,10 +119,13 @@ def apply_fixes(findings):
             rule = f["id"][len("a11y-"):].rsplit("-", 1)[0]
             regulation = "WCAG 2.2 AA (Public Sector Bodies Accessibility Regulations 2018)"
             fix = AXE_FIXES.get(rule, "Fix the elements listed in the evidence so they meet WCAG 2.2 AA.")
+            reason = AXE_REASONS.get(rule) or AXE_SEVERITY_REASONS.get(f["severity"], "")
         else:
             regulation, fix = FIXES.get(f["id"], ("", ""))
+            reason = SEVERITY_REASONS.get(f["id"]) or (CLAUSE_REASON if f["id"].startswith("pv-") else "")
         f["regulation"] = regulation or f["regulation"]  # the library's citation is more specific
         f["fix"] = f["fix"] or fix
+        f["severity_reason"] = f.get("severity_reason") or reason
     return findings
 
 
@@ -86,6 +136,14 @@ def summarise(findings):
         return "No compliance problems found in the areas we check."
     counts = {s: sum(f["severity"] == s for f in problems) for s in ("critical", "high", "medium", "low")}
     parts = [f"{n} {s}" for s, n in counts.items() if n]
-    worst = sorted(problems, key=lambda f: ["critical", "high", "medium", "low"].index(f["severity"]))[:3]
-    return (f"We found {len(problems)} issues ({', '.join(parts)}). "
-            f"Fix these first: {'; '.join(f['title'] for f in worst)}.")
+    breakdown = ", ".join(parts[:-1]) + " and " + parts[-1] if len(parts) > 1 else parts[0]
+    areas = sorted({f["category"] for f in problems if f["severity"] in ("critical", "high")})
+    issue_word = "issue" if len(problems) == 1 else "issues"
+    summary = f"We found {len(problems)} {issue_word}: {breakdown}."
+    if areas:
+        summary += f" The most serious are in {_join(areas)}, so start there."
+    return summary
+
+
+def _join(words):
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
