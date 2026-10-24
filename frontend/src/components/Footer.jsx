@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="footer__row">
         <span className="footer__brand">
           <ShieldIcon width={16} height={16} />
-          Compliance Checker
+          GovCheck
         </span>
         <nav className="footer__links">
           <Link to="/docs">Docs</Link>
