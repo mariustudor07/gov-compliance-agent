@@ -84,7 +84,7 @@ const FAQ = [
   },
   {
     q: "What's actually running under the hood?",
-    a: "A Playwright-driven crawler, axe-core for accessibility, our own trained privacy-notice classifier, Google Gemini for explanations and the cookie-banner vision check, and MongoDB Atlas (including Vector Search) to ground every citation in the real text of the law.",
+    a: "A real-browser crawler (Scrapling), axe-core for accessibility, our own trained privacy-notice classifier, Google Gemini for explanations and the cookie-banner vision check, and MongoDB Atlas (including Vector Search) to ground every citation in the real text of the law.",
   },
 ];
 

@@ -277,7 +277,7 @@ Browser does not support script.,other,other,False,False,,https://www.lse.ac.uk/
 "for more information, including information on specific privacy policies.",other,other,False,False,,https://www.lse.ac.uk/lse-information/privacy-policy
 LSE logs additionally contain the username used to access restricted areas of the Website.,purpose,rights,False,True,,https://www.lse.ac.uk/lse-information/privacy-policy
 Browser does not support script.,other,other,False,False,,https://www.lse.ac.uk/lse-information/privacy-policy
-"For more information about cookies and how to manage or disable cookies, please refer to our",rights,purpose,False,True,,https://www.lse.ac.uk/lse-information/privacy-policy
+"For more information about cookies and how to manage or disable cookies, please refer to our",cookies,purpose,False,True,,https://www.lse.ac.uk/lse-information/privacy-policy
 "LSE will hold your personal data securely in accordance with the Act, under which it is fully registered and the GDPR.",security,other,False,True,,https://www.lse.ac.uk/lse-information/privacy-policy
 "Whenever we collect your details, we’ll be clear about what we will do with it and why.",purpose,other,False,True,,https://www.cancerresearchuk.org/privacy-statement
 Working with other organisations and sharing data,third_parties,other,False,True,,https://www.cancerresearchuk.org/privacy-statement
@@ -363,7 +363,7 @@ How and when we collect information about you,data_collected,other,False,True,,h
 "However, we are happy to provide any additional information or explanation when needed.",purpose,purpose,False,True,,https://www.rspca.org.uk/utilities/privacy
 Keep your information up to date,rights,retention,False,True,,https://www.rspca.org.uk/utilities/privacy
 Exercising your privacy rights,rights,other,False,True,,https://www.rspca.org.uk/utilities/privacy
-"There may be a separate Privacy Notice which describes how we use your data in specific cases, e.g.",purpose,purpose,False,True,,https://www.rspca.org.uk/utilities/privacy
+"There may be a separate Privacy Notice which describes how we use your data in specific cases, e.g.",other,purpose,False,True,,https://www.rspca.org.uk/utilities/privacy
 "Whatever your relationship with us, we will only store your information for a specified amount of time as set out in our internal data retention policy.",retention,retention,False,False,,https://www.rspca.org.uk/utilities/privacy
 Access your personal data or make a disclosure request,rights,other,False,True,,https://www.rspca.org.uk/utilities/privacy
 Sharing your information with third parties,third_parties,third_parties,False,False,,https://www.rspca.org.uk/utilities/privacy
