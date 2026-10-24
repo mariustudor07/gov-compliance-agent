@@ -7,8 +7,11 @@ Two jobs:
 import re
 
 # Checked in this order; the first label with a matching pattern wins.
+# Note: second_opinion in labels.csv was generated before the cookies/security/data_collected/
+# automated_decisions labels existed, so it never suggests those.
 # More specific labels come first (e.g. "complain to the ICO" before generic "contact us").
 RULES = [
+    ("automated_decisions", [r"automated (decision|means)", r"\bprofiling\b", r"without (a )?human"]),
     ("complaints_ico", [r"\binformation commissioner", r"\bico\b", r"\bcomplain"]),
     ("contact_dpo", [r"data protection officer", r"\bdpo\b", r"contact us", r"@[\w.-]+\.\w+", r"write to"]),
     ("retention", [r"\bretain", r"\bretention\b", r"how long", r"\bkeep (your|the|this|personal)",
@@ -17,10 +20,16 @@ RULES = [
                 r"\bobject to\b", r"\brestrict", r"subject access"]),
     ("lawful_basis", [r"lawful basis", r"legal basis", r"legitimate interest", r"public task",
                       r"legal obligation", r"vital interest", r"article 6", r"performance of a contract"]),
+    ("cookies", [r"\bcookies?\b", r"tracking (pixels?|technolog)", r"local storage", r"do not track"]),
+    ("security", [r"\bsecur(e|ity|ely)\b", r"\bencrypt", r"unauthori[sz]ed access", r"\bsafeguards?\b",
+                  r"\bprotect (your|personal) (data|information)"]),
     ("third_parties", [r"\bshare\b", r"\bshared\b", r"third[- ]part", r"\bprocessors?\b", r"\btransfer",
                        r"\bdisclose", r"outside (the uk|the european)", r"\bsuppliers?\b"]),
     ("controller", [r"data controller", r"\bcontroller\b", r"\bregistered (office|in england)",
                     r"company number", r"\bwe are\b.*\bresponsible"]),
+    ("data_collected", [r"\b(information|data) (we|that we) (collect|hold|process|receive)",
+                        r"\bwe (may )?collect\b", r"\bip address", r"\bemail address", r"\bdevice identifiers?",
+                        r"\bname, (address|email)", r"what (personal )?(data|information)"]),
     ("purpose", [r"\bwe use (your|this|the|personal)", r"\bpurposes?\b", r"\bin order to\b",
                  r"\bto (provide|improve|deliver|process|manage) "]),
 ]
