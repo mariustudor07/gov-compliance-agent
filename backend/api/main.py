@@ -57,6 +57,12 @@ def scans():
     return agent_store.list_scans() if db_enabled() else []
 
 
+@app.get("/search")
+def search(q: str):
+    """Search every website's latest findings, e.g. "tracking cookies" (Atlas Search, typo-tolerant)."""
+    return agent_store.search_findings(q) if db_enabled() and q.strip() else []
+
+
 @app.get("/scans/{scan_id}")
 def scan_by_id(scan_id: str):
     result = agent_store.get_scan(scan_id) if db_enabled() else None

@@ -27,4 +27,9 @@ export function getScan(id) {
   return request(`/scans/${id}`);
 }
 
+/** GET /search?q=... -> [{scan_id, url, scanned_at, title, severity, page}] (Atlas Search over findings) */
+export function searchFindings(q) {
+  return request(`/search?q=${encodeURIComponent(q)}`);
+}
+
 export { API_BASE };

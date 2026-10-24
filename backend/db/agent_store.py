@@ -261,11 +261,35 @@ class AgentStore:
 
 
 # --- reads for the website (History / report pages): not the AI agent, so not audited -------------
+def _latest_scans(db, limit):
+    """The most recent scan of each website (older scans stay in the database, they just aren't listed)."""
+    return list(db.Code_Scans.aggregate([
+        {"$sort": {"Started_At": -1}},
+        {"$group": {"_id": "$Summary.url", "scan": {"$first": "$$ROOT"}}},
+        {"$replaceRoot": {"newRoot": "$scan"}},
+        {"$sort": {"Started_At": -1}}, {"$limit": limit}, {"$project": {"_id": 0}}]))
+
+
 def list_scans(limit=20):
-    db = get_db()
-    scans = db.Code_Scans.find({}, {"_id": 0}).sort("Started_At", -1).limit(limit)
     return [{"id": s["Scan_ID"], "url": s["Summary"]["url"], "scanned_at": s["Summary"]["scanned_at"],
-             "scores": s["Summary"]["scores"]} for s in scans]
+             "scores": s["Summary"]["scores"]} for s in _latest_scans(get_db(), limit)]
+
+
+def search_findings(query, limit=30):
+    """Atlas Search (index findings_text, typo-tolerant) over the findings of each website's latest scan."""
+    db = get_db()
+    latest = {s["Scan_ID"]: s["Summary"] for s in _latest_scans(db, 500)}
+    hits = db.Findings.aggregate([
+        {"$search": {"index": "findings_text", "text": {
+            "query": query, "path": ["Evidence.title", "Evidence.text", "Explanation", "Reccomendation"],
+            "fuzzy": {"maxEdits": 1}}}},
+        {"$match": {"Scan_ID": {"$in": list(latest)}, "Severity": {"$ne": "Pass"}}},
+        {"$limit": limit},
+        {"$project": {"_id": 0, "Scan_ID": 1, "Severity": 1, "File_Path": 1, "Evidence.title": 1,
+                      "score": {"$meta": "searchScore"}}}])
+    return [{"scan_id": h["Scan_ID"], "url": latest[h["Scan_ID"]]["url"],
+             "scanned_at": latest[h["Scan_ID"]]["scanned_at"], "title": h["Evidence"]["title"],
+             "severity": h["Severity"].lower(), "page": h["File_Path"]} for h in hits]
 
 
 def get_scan(scan_id):

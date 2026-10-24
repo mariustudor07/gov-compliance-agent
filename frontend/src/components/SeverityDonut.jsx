@@ -1,11 +1,11 @@
 import { SEVERITY_LABEL } from "../lib/format";
 
 const COLORS = {
-  critical: "#dc2626",
-  high: "#c2410c",
-  medium: "#a16207",
+  critical: "#ce2323",
+  high: "#c0400b",
+  medium: "#9d6006",
   low: "#0e7490",
-  pass: "#15803d",
+  pass: "#147e3c",
 };
 
 const ORDER = ["critical", "high", "medium", "low", "pass"];
