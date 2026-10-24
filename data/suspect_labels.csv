@@ -1,0 +1,15 @@
+row,label,model_says,confidence,sentence
+93,rights,third_parties,0.7,"Where appropriate, we will also tell you which third parties we have disclosed the inaccurate or incomplete personal data to."
+85,rights,third_parties,0.7,"If we have shared this personal data with third parties, we will notify them about the rectification unless this is impossible or involves disproportionate effort."
+278,rights,cookies,0.63,"For more information about cookies and how to manage or disable cookies, please refer to our"
+74,other,third_parties,0.65,"However, in some instances we provide statistical services to other organisations or government departments and collect or process data on their behalf."
+140,third_parties,lawful_basis,0.61,"The police, or other law-enforcement bodies, for the purposes of undertaking investigations or where we are legally obliged to do so;"
+528,purpose,other,0.69,"enter you into, and run, prize draws"
+594,purpose,third_parties,0.65,"We also use your personal data to show you online advertising on websites across the Sainsbury's Group, on other websites and online media channels."
+173,automated_decisions,purpose,0.64,How is my information being used to make decisions?
+672,other,purpose,0.63,"For example, an accelerometer can be used to determine your speed and a gyroscope to work out your direction of travel."
+115,rights,lawful_basis,0.63,it is necessary for the data to be deleted for us to comply with our legal obligations as a data controller
+105,other,rights,0.62,to exercise the right of freedom of expression and information
+395,purpose,other,0.63,To enable you to register for an account on our sites.
+364,purpose,other,0.62,"There may be a separate Privacy Notice which describes how we use your data in specific cases, e.g."
+539,purpose,third_parties,0.6,"With your permission, we access and store specific details about accounts you hold with other banks to help us make lending decisions."
