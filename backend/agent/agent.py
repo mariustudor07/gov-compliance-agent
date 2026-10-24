@@ -54,6 +54,9 @@ def analyse(url, store=None):
     # fix library first, then the ranking has the final say on severity (docs/ranking.md)
     findings = rank_all(apply_fixes(scanner_findings + banner + _privacy_findings(scan)), url)
     summary = _explain_with_gemini(url, findings, store) or summarise(findings)
+    if scan["redirected_to"]:
+        summary = (f"Note: {url} redirects to a different website ({scan['redirected_to']}), so these results are "
+                   f"about that site, not {url}. " + summary)
 
     return {
         "url": url,

@@ -1,6 +1,8 @@
 """WCAG 2.2 AA checks using axe-core, plus the legally required accessibility statement."""
 import inspect
 
+import httpx
+
 from .findings import finding
 
 AXE_URL = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.2/axe.min.js"
@@ -11,12 +13,28 @@ ORDER = ["critical", "high", "medium", "low"]
 COMPLIANCE_PHRASES = ("fully compliant", "partially compliant", "not compliant")
 
 
+AXE_TIME_LIMIT_MS = 20000  # axe never finished on some pages (encodehub.com), hanging the whole scan
+_axe_source = None
+
+
+def _axe_script():
+    """axe-core's code, downloaded once and injected inline: no per-page network request that can stall."""
+    global _axe_source
+    if _axe_source is None:
+        _axe_source = httpx.get(AXE_URL, timeout=15, follow_redirects=True).raise_for_status().text
+    return _axe_source
+
+
 def run_axe(page):
     """Runs inside the open browser page (called by the crawler).
-    Returns axe violations, or None if axe couldn't run on this page."""
+    Returns axe violations, or None if axe couldn't run (or finish in time) on this page."""
     try:
-        page.add_script_tag(url=AXE_URL)
-        script = "async () => (await axe.run(document, {runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']})).violations"
+        page.add_script_tag(content=_axe_script())
+        # Playwright's evaluate() has no timeout, so the time limit is enforced inside the page.
+        script = ("async () => Promise.race(["
+                  "axe.run(document, {runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']}).then(r => r.violations),"
+                  f"new Promise((_, reject) => setTimeout(() => reject(new Error('axe-core took longer than "
+                  f"{AXE_TIME_LIMIT_MS // 1000}s')), {AXE_TIME_LIMIT_MS}))])")
         if "isolated_context" in inspect.signature(page.evaluate).parameters:
             # Scrapling's stealth browser (patchright) runs evaluate() in a hidden world by default,
             # where the axe we just injected into the page isn't visible.

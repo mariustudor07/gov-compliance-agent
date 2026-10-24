@@ -91,3 +91,11 @@ def test_known_jurisdiction_links_its_main_law():
     store = AgentStore(db=NoDatabase())
     store.find = lambda collection, query, why: [{"Src_ID": query["Src_ID"]}]
     assert store._governing_source("UK") == "UKGDPR"
+
+
+def test_redirect_to_another_website_is_detected():
+    from scanner.scan import _other_site
+    assert _other_site("https://encodehub.com", "https://www.hugedomains.com/domain_profile.cfm")  # parked domain
+    assert not _other_site("https://gov.uk", "https://www.gov.uk/")
+    assert not _other_site("https://hub.encodeclub.com", "https://encodeclub.com/")
+    assert not _other_site("https://motorlog.app", "https://motorlog.app/quick-check")

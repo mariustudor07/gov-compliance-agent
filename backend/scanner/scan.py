@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 from .accessibility import check_accessibility
 from .blocked import blocked_reason
-from .cookies import check_cookies
+from .cookies import _base_domain, check_cookies
 from .crawler import crawl
 from .privacy_page import best_notice
 from .security import check_security
@@ -38,4 +38,14 @@ def run_scan(url):
         "privacy_page": privacy_page["url"] if privacy_page else "",
         "homepage_screenshot": crawl_result["homepage_screenshot"],
         "blocked": "",
+        "redirected_to": _other_site(url, crawl_result["pages"][0]["url"]),
     }
+
+
+def _other_site(requested, landed):
+    """The address we ended up on, if it belongs to a different website (e.g. encodehub.com is a parked domain
+    that redirects to hugedomains.com), else "". Results are then about that other site, and the report says so."""
+    a, b = ((urlparse(u).hostname or "").lower().removeprefix("www.") for u in (requested, landed))
+    same = (a == b or a.endswith("." + b) or b.endswith("." + a)  # gov.uk <-> www.gov.uk, hub.x.com <-> x.com
+            or _base_domain(a) == _base_domain(b))
+    return landed if a and b and not same else ""
