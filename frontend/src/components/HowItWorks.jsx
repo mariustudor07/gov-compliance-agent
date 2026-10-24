@@ -5,19 +5,19 @@ const STEPS = [
   {
     icon: CrawlIcon,
     title: "Crawl",
-    body: "We open your site in a real browser and find the privacy, cookie and accessibility pages — no manual digging.",
+    body: "We open your site in a real browser and find the privacy, cookie and accessibility pages, no manual digging.",
     color: "#2563eb", // blue
   },
   {
     icon: ChecksIcon,
     title: "Inspect",
-    body: "Automated checks for accessibility (axe-core), cookies set before consent, and security headers — plus our own ML model reads the privacy policy for missing clauses.",
+    body: "Automated checks for accessibility (axe-core), cookies set before consent, and security headers, plus our own ML model reads the privacy policy for missing clauses.",
     color: "#7c3aed", // violet
   },
   {
     icon: LawIcon,
     title: "Cite the law",
-    body: "Every issue is matched against the real text of UK GDPR, PECR and WCAG 2.2 via vector search — never a guess.",
+    body: "Every issue is matched against the real text of UK GDPR, PECR and WCAG 2.2 via vector search, never a guess.",
     color: "#b45309", // amber
   },
   {

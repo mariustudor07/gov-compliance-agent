@@ -18,7 +18,7 @@ export default function Footer() {
         </nav>
       </div>
       <p className="footer__disclaimer">
-        Not legal advice — an automated first pass, built for Encode London 2026. Verify anything
+        Not legal advice: an automated first pass, built for Encode London 2026. Verify anything
         important with a qualified professional.
       </p>
     </footer>

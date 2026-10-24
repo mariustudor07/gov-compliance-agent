@@ -17,7 +17,7 @@ export default function ReportById() {
         if (!cancelled) setResult(data);
       })
       .catch(() => {
-        if (!cancelled) setError("Couldn't load this scan — is the API running?");
+        if (!cancelled) setError("Couldn't load this scan. Is the API running?");
       });
     return () => {
       cancelled = true;

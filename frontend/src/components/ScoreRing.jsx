@@ -60,7 +60,7 @@ export default function ScoreRing({ score, size = 86, strokeWidth = 7 }) {
           />
         )}
       </svg>
-      <span className="ring__value">{typeof score === "number" ? value : "—"}</span>
+      <span className="ring__value">{typeof score === "number" ? value : "N/A"}</span>
     </div>
   );
 }

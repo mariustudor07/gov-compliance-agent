@@ -10,6 +10,12 @@ import Docs from "./pages/Docs";
 export default function App() {
   return (
     <>
+      <div className="bg-aurora" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
       <Nav />
       <main className="page">
         <Routes>
