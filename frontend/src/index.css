@@ -562,9 +562,9 @@ h3 {
 }
 
 .timeline__step--done .timeline__node {
-  background: var(--good-bg);
+  background: var(--good);
   border-color: var(--good);
-  color: var(--good);
+  color: #fff;
 }
 
 .timeline__step--done .timeline__label {
@@ -572,10 +572,10 @@ h3 {
 }
 
 .timeline__step--active .timeline__node {
-  background: rgba(79, 70, 229, 0.1);
+  background: var(--brand);
   border-color: var(--brand);
-  color: var(--brand);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
   animation: pulse 1.4s ease-in-out infinite;
 }
 

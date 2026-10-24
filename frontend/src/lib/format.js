@@ -26,13 +26,15 @@ export const CATEGORY_COLOR = {
 };
 
 // Generic "what does this severity mean" text, used whenever a finding
-// doesn't come with its own `severity_reason` from the backend yet.
+// doesn't come with its own `severity_reason` from the backend yet. Framed
+// as a legal question (which law, how directly it's breached) — not an
+// ethical or UX judgement.
 export const SEVERITY_REASON_FALLBACK = {
-  critical: "Blocks people from using the site, exposes personal data, or breaks the law outright — fix this first.",
-  high: "A real compliance gap a regulator or auditor would flag. Should be fixed before launch.",
-  medium: "Worth fixing — it falls short of the rule, but doesn't block access or breach the law outright.",
-  low: "A minor improvement. Good practice, not a legal requirement.",
-  pass: "This check came back clean — no action needed.",
+  critical: "A direct, unambiguous breach of UK GDPR, PECR or the 2018 Accessibility Regulations — not a style or UX issue.",
+  high: "A specific breach a regulator (the ICO) or an accessibility audit would cite by name. Required to fix, not optional.",
+  medium: "Falls short of a legal requirement, though short of an outright breach — still non-compliant, just lower-risk.",
+  low: "Recommended practice under the relevant guidance, but not something the law currently mandates.",
+  pass: "Meets the legal requirement this check is based on.",
 };
 
 /** The reason a finding got its severity: the finding's own text if the
@@ -58,33 +60,33 @@ export function scoreTier(score) {
 const CATEGORY_LEGAL = {
   accessibility: {
     law: "Public Sector Bodies Accessibility Regulations 2018 → WCAG 2.2 AA",
-    good: "Disabled users can use the site without hitting barriers — this meets the legal bar the Regulations set.",
-    ok: "Real barriers remain for disabled users. Each unresolved WCAG violation is a specific legal non-compliance, not a style nitpick.",
-    bad: "Disabled users are likely blocked from core parts of the site — a direct breach of the 2018 Regulations, which apply to public sector sites by law.",
+    good: "Meets the legal standard the 2018 Regulations set: WCAG 2.2 AA.",
+    ok: "Each unresolved WCAG 2.2 AA violation is a specific breach of the 2018 Regulations — a legal issue, not a style preference.",
+    bad: "Multiple WCAG 2.2 AA failures — a direct breach of the Public Sector Bodies Accessibility Regulations 2018, a legal duty for public sector sites, not a recommendation.",
   },
   cookies: {
     law: "PECR (Privacy and Electronic Communications Regulations), Reg. 6",
-    good: "No tracking cookies are set before the user consents — exactly what PECR requires.",
-    ok: "The consent banner likely has no genuine 'reject' option, which the ICO treats as invalid consent under PECR.",
-    bad: "Cookies are being set before anyone agrees to them. Under PECR Reg. 6 that's unlawful tracking, with no ambiguity.",
+    good: "Complies with PECR Reg. 6: no non-essential cookie is set before consent.",
+    ok: "No genuine 'reject' option on the banner means the consent collected here is invalid under the ICO's interpretation of PECR.",
+    bad: "Cookies are set before consent is given — an unlawful act under PECR Reg. 6, regardless of what the cookies are used for.",
   },
   privacy: {
     law: "UK GDPR Art. 13–14 & Data Protection Act 2018",
-    good: "The privacy notice covers what Art. 13 requires: who's responsible, why data is collected, and people's rights.",
-    ok: "The privacy notice is missing some information Art. 13 makes mandatory, not optional extras.",
-    bad: "The privacy notice is missing most of what Art. 13 legally requires (controller, lawful basis, retention, rights) — people can't exercise rights they were never told they have.",
+    good: "Satisfies the mandatory disclosure requirements of UK GDPR Art. 13.",
+    ok: "Missing information that Art. 13 makes a legal requirement to disclose, not optional detail.",
+    bad: "Missing most of what Art. 13 legally mandates (controller, lawful basis, retention, rights) — a breach of a statutory disclosure duty.",
   },
   security: {
     law: "UK GDPR Art. 32 (security of processing) & NCSC guidance",
-    good: "Baseline technical protections (HTTPS, security headers) are in place — what Art. 32 expects as a minimum.",
-    ok: "Some baseline protections are missing. Art. 32 requires 'appropriate technical measures' — gaps here can themselves count as a GDPR breach.",
-    bad: "Multiple basic protections are missing. Under Art. 32, failing to secure personal data is itself a breach, even before any data is actually stolen.",
+    good: "Meets the baseline technical measures UK GDPR Art. 32 requires.",
+    ok: "A gap against the 'appropriate technical measures' UK GDPR Art. 32 requires — a compliance issue in itself, separate from whether data has actually been compromised.",
+    bad: "Multiple baseline protections absent. Under Art. 32, this is itself a breach of the duty to secure personal data, regardless of whether an incident has occurred.",
   },
   overall: {
     law: "Blended across UK GDPR, PECR, WCAG 2.2 AA and NCSC guidance",
-    good: "This site is meeting its obligations across accessibility, cookies, privacy and security.",
-    ok: "There are real gaps in at least one legal area above — worth fixing before this is genuinely compliant.",
-    bad: "This site carries meaningful legal risk across multiple UK laws, not just one area.",
+    good: "No outstanding legal non-compliance across the four laws this tool checks.",
+    ok: "At least one category above has an active legal non-compliance that needs resolving.",
+    bad: "Legal non-compliance across multiple UK laws at once, not an isolated issue.",
   },
 };
 
