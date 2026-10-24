@@ -19,6 +19,18 @@ from .scoring import score
 
 def analyse(url):
     scan = run_scan(url)
+    if scan["blocked"]:
+        # Honest "couldn't scan" result: no scores, no findings, so we never blame a site for its bot protection.
+        return {
+            "url": url,
+            "scanned_at": datetime.now(timezone.utc).isoformat(),
+            "pages_crawled": scan["pages_crawled"],
+            "blocked": True,
+            "scores": {},
+            "findings": [],
+            "summary": (f"We couldn't scan this site: {scan['blocked']}. Many large sites block automated "
+                        "tools, so this says nothing about whether the site is compliant. It needs a manual check."),
+        }
     banner = check_banner(scan["homepage_screenshot"], scan["pages_crawled"][0])
     findings = apply_fixes(scan["findings"] + banner + _privacy_findings(scan))
     summary = _explain_with_gemini(url, findings) or summarise(findings)

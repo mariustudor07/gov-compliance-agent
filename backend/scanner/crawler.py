@@ -77,9 +77,13 @@ def crawl(url, max_pages=5):
 
 def _matching_links(page, host, keywords):
     """Same-site links whose URL or text contains one of the keywords, in page order, no duplicates."""
-    links = page.eval_on_selector_all("a[href]", "els => els.map(e => [e.href, e.innerText])")
+    # SVG links have an object as href (with .baseVal), not a string; that crashed the scan on cam.ac.uk.
+    links = page.eval_on_selector_all(
+        "a[href]", "els => els.map(e => [typeof e.href === 'string' ? e.href : (e.href && e.href.baseVal) || '', e.innerText || ''])")
     found = []
     for href, label in links:
+        if not href.startswith("http"):
+            continue
         href = href.split("#")[0]
         text = (href + " " + label).lower()
         if urlparse(href).netloc == host and any(k in text for k in keywords) and href not in found:

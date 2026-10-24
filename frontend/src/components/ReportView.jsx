@@ -18,6 +18,19 @@ export default function ReportView({ result, usingMock = false }) {
   const grouped = groupBySeverity(findings);
   const counts = countBySeverity(findings);
 
+  // The site blocked our scanner (bot protection): show why, and no scores, so we never imply it failed.
+  if (result.blocked) {
+    return (
+      <div className="report">
+        <div className="report__head">
+          <h1>{url}</h1>
+          <p className="report__meta">Scanned {formatDate(scanned_at)}</p>
+        </div>
+        <div className="banner">{summary}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="report">
       {usingMock && (
