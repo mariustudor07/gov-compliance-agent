@@ -79,6 +79,34 @@ Per label (our model):
 | controller | 0.78 | 0.32 | 0.45 |
 | automated_decisions | 0.50 | 0.20 | 0.29 |
 
+## Document-level results: what the app actually decides
+
+The app doesn't need every sentence right. It needs to know, for a whole policy, whether each of the 8
+required clauses appears at least once. `python -m ml.evaluate_documents` measures that fairly:
+for each of the 20 policies, the model is trained on the **other 19 only** and then run on the full
+text of the one it has never seen. Results are in `data/doc_eval.csv`.
+
+| | |
+|---|---|
+| Decisions checked (20 policies × 8 clauses, 8 marked "unclear" and excluded) | 152 |
+| **Correct** | **146 (96%)** |
+| Real gaps correctly flagged | 15 of 16 (94%) |
+| False alarms (flagged missing, but it's there) | 5 |
+| Gaps missed | 1 |
+
+All 6 errors are in the two weakest sentence-level classes, `controller` and `complaints_ico`, e.g.
+Spotify says "your local data protection authority" instead of naming the ICO.
+
+**How the correct answers were decided:** a clause counts as present if the page states it or clearly
+links to a sub-page that does (the ICO-endorsed "layered notice" style). Borderline cases (partially
+loaded pages, organisation named but no controller statement) were marked `unclear` and excluded.
+**The truth column was judged by an AI assistant (Claude) and still needs a human spot-check**,
+especially the 6 disagreements and 8 unclear rows.
+
+**Possible next step:** add high-precision rules ("Information Commissioner", "data protection authority",
+"company/charity number") as a backstop for the two weak clauses. If we do, re-test on *new* policies,
+not these 20, so we don't tune to the test.
+
 Earlier 9-label numbers (72% on unreviewed labels) aren't comparable: fewer categories, and graded
 against LLM labels before human review.
 

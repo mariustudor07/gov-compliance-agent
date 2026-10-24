@@ -1,0 +1,161 @@
+policy,clause,model,confidence,evidence,truth
+https://www.gov.uk/help/privacy-notice,controller,present,0.61,", the Department for Work and Pensions will be the responsible controller.",present
+https://www.gov.uk/help/privacy-notice,purpose,present,0.64,to see how you use GOV.UK and to see how well the site performs on your device.,present
+https://www.gov.uk/help/privacy-notice,lawful_basis,present,0.79,Our legal basis for processing your data,present
+https://www.gov.uk/help/privacy-notice,rights,present,0.69,You have the right to request:,present
+https://www.gov.uk/help/privacy-notice,retention,present,0.71,We will only retain your personal data for as long as it is needed for the purposes set out in this document or for as long as the law requires us to.,present
+https://www.gov.uk/help/privacy-notice,contact_dpo,present,0.69,You can also contact our Data Protection Officer (,present
+https://www.gov.uk/help/privacy-notice,third_parties,present,0.77,"It may also be shared with our technology suppliers, for example our hosting provider.",present
+https://www.gov.uk/help/privacy-notice,complaints_ico,present,0.71,"You can also make a complaint to the Information Commissioner, who is an independent regulator.",present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,controller,present,0.45,For the vast majority of our work ONS is the controller and makes those decisions.,present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,purpose,present,0.80,"The purpose of this is to monitor staff performance and training, check data quality and respondent understanding of survey questions, and to understand the impact of materials sent to respondents in advance of the survey being carried out.",present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,lawful_basis,present,0.78,The legal basis for the processing,present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,rights,present,0.77,You have the right to request from any controller that holds your personal data: access to the information they hold about you and to amend any wrong or inaccurate information they hold about you.,present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,retention,present,0.64,These recordings will not be kept for any longer than 13 months.,present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,contact_dpo,present,0.75,"If you have any queries about how your personal data is used, please contact",present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,third_parties,present,0.72,This data is stored and processed by third parties (8x8 and Anywhere365) using data centres located in the UK.,present
+https://www.ons.gov.uk/aboutus/transparencyandgovernance/dataprotection,complaints_ico,missing,0.34,You have the right to complain about the handling of your personal data.,present
+https://www.nhs.uk/our-policies/privacy-policy/,controller,present,0.47,The NHS website Data Controller,present
+https://www.nhs.uk/our-policies/privacy-policy/,purpose,present,0.76,We analyse information to see what is most effective about our website and associated services to help us identify ways to improve it and to make it more effective.,present
+https://www.nhs.uk/our-policies/privacy-policy/,lawful_basis,present,0.77,to comply with legal obligations or for the performance of a public interest task or exercise of official authority,present
+https://www.nhs.uk/our-policies/privacy-policy/,rights,present,0.81,"In certain situations, you have the right to request us to ""remove"" your personal data.",present
+https://www.nhs.uk/our-policies/privacy-policy/,retention,present,0.73,We will hold the information for as long as we are providing you services.,present
+https://www.nhs.uk/our-policies/privacy-policy/,contact_dpo,present,0.64,"if there are any queries regarding this privacy policy, you may contact us using the information below:",present
+https://www.nhs.uk/our-policies/privacy-policy/,third_parties,present,0.78,This information will not be shared with third parties.,present
+https://www.nhs.uk/our-policies/privacy-policy/,complaints_ico,present,0.50,you also have the right to lodge a complaint with the Information Commissioner's Office.,present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,controller,present,0.62,Omni are registered on the Information Commissio Register of Data Controllers under registration number Z7378991 and act as a data controller and a data processor.,present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,purpose,present,0.71,"Similarly, if in the future we intend to process your data for a purpose other than that for which it was collected, we will provide you with information on that purpose and any other relevant information.",present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,lawful_basis,present,0.72,"comply with our legal obligations (for example, with respect to tax legislation) and to protect our legal position in the event of legal proceedings",present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,rights,present,0.82,"You have the right to request erasure of your personal data or to restrict processing in accordance with data protection laws, as well as to object to any direct marketing from us and to be informed about any automated decision-making that we use.",present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,retention,present,0.78,"Please note at the end of the 12 month retention period, your personally identifiable data will be anonymised and retained for 3 years for reporting purposes.",present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,contact_dpo,present,0.48,Should you wish to query the way Ofcom is handling your personal data or submit a complaint about this you should address this to our Data Protection Officer at:,present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,third_parties,present,0.82,"We may also need to share your data with the third-parties who provide our pension, health insurance schemes and/or other ‘Choices’ benefits to our employees.",present
+https://www.ofcom.org.uk/about-ofcom/foi-dp/general-privacy-statement,complaints_ico,present,0.73,Complaints to the Information Commission,present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,controller,missing,0.29,"In these scenarios, we are joint controllers with these companies because we jointly determine the purposes and means of processing your personal data.",present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,purpose,present,0.81,"to help us understand how people are using our services, so we can make them better",present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,lawful_basis,present,0.73,"It's called the ""lawful basis for processing"".",present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,rights,present,0.78,"to change your mind, and ask us to stop using your information.",present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,retention,present,0.71,How long will the BBC keep my personal information?,present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,contact_dpo,present,0.71,If you’re outside the UK please contact the BBC Studios Data Protection Officer:,present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,third_parties,present,0.81,When we share personal information with companies in the BBC family,present
+https://www.bbc.co.uk/usingthebbc/privacy-policy/,complaints_ico,present,0.46,Information Commissioner's Office,present
+https://www.kcl.ac.uk/terms/privacy,controller,present,0.54,"We are King’s College London, one of the top 40 universities in the world and the fourth oldest university in England.",present
+https://www.kcl.ac.uk/terms/privacy,purpose,present,0.59,"We will generally use your personal information to provide you with the services, products or information you have requested from us.",present
+https://www.kcl.ac.uk/terms/privacy,lawful_basis,present,0.71,More about ‘legal’/’lawful’ basis:,present
+https://www.kcl.ac.uk/terms/privacy,rights,present,0.79,To ask us to stop using your information in a certain way,present
+https://www.kcl.ac.uk/terms/privacy,retention,present,0.75,How long do we keep your information for?,present
+https://www.kcl.ac.uk/terms/privacy,contact_dpo,present,0.66,"To contact us about our privacy notice or information we hold about you, please write to the university’s Data Protection Officer, Callum Morrison:",present
+https://www.kcl.ac.uk/terms/privacy,third_parties,present,0.75,"We may need to share your information with our service providers for these purposes, but we will ensure that appropriate contracts with these parties are in place and they only process your information in accordance with our instructions and data protection legislation.",present
+https://www.kcl.ac.uk/terms/privacy,complaints_ico,present,0.55,How can you contact us or make a complaint to the regulator?,present
+https://www.lse.ac.uk/lse-information/privacy-policy,controller,missing,0.09,"When video and audio recordings hosted on the LSE website are downloaded, log entries will track the time of download, number of downloads and the geographical location of all Users",unclear
+https://www.lse.ac.uk/lse-information/privacy-policy,purpose,present,0.49,These logs are used to analyse usage of the Website.,present
+https://www.lse.ac.uk/lse-information/privacy-policy,lawful_basis,missing,0.34,LSE complies with all requirements of the law on protection of personal data held on computer or in manual records.,unclear
+https://www.lse.ac.uk/lse-information/privacy-policy,rights,present,0.54,"Should you request that we amend or suppress records containing your personal data, we will endeavour to do so as promptly as practical.",present
+https://www.lse.ac.uk/lse-information/privacy-policy,retention,present,0.75,We will hold your personal information on our systems for as long as it is still used for the purpose stated when originally requested.,present
+https://www.lse.ac.uk/lse-information/privacy-policy,contact_dpo,missing,0.10,This username is not collected by nor shared with Nedstat or Google Inc.,missing
+https://www.lse.ac.uk/lse-information/privacy-policy,third_parties,missing,0.40,"LSE is only able to link log entries to individuals where it holds personal data that can be associated with log entries using IP address, username, or reference number from cookies.",unclear
+https://www.lse.ac.uk/lse-information/privacy-policy,complaints_ico,present,0.41,The Information Commissioner’s Office (ICO) defines a cookie as,missing
+https://www.cancerresearchuk.org/privacy-statement,controller,present,0.57,"Cancer Research UK (registered charity in England and Wales (1089464), Scotland (SC041666) and the Isle of Man (1103), a company limited by guarantee in England (4325234) and the Isle of Man (5713F)); and",present
+https://www.cancerresearchuk.org/privacy-statement,purpose,present,0.70,Below you can read more detailed information about how we use your data in specific circumstances.,present
+https://www.cancerresearchuk.org/privacy-statement,lawful_basis,present,0.54,"- This page explains the legal bases Cancer Research UK relies on to use personal information, as required under UK data protection law.",present
+https://www.cancerresearchuk.org/privacy-statement,rights,present,0.55,"- This page explains your rights in relation to the personal information we hold about you, and how you can exercise them.",present
+https://www.cancerresearchuk.org/privacy-statement,retention,missing,0.12,This policy was last updated in March 2026.,missing
+https://www.cancerresearchuk.org/privacy-statement,contact_dpo,missing,0.36,Your data and getting in touch,unclear
+https://www.cancerresearchuk.org/privacy-statement,third_parties,present,0.74,Working with other organisations and sharing data,present
+https://www.cancerresearchuk.org/privacy-statement,complaints_ico,missing,0.04,- This page explains how Cancer Research UK handles personal information when you get in touch with us.,missing
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,controller,missing,0.01,help us campaign for changes that make things fairer for everyone,missing
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,purpose,present,0.59,"see what help people need most, so we can make our site better",unclear
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,lawful_basis,missing,0.12,"As it’s turned off, we’ll only use the essential cookies our website needs to work.",missing
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,rights,missing,0.18,help us campaign for changes that make things fairer for everyone,missing
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,retention,present,0.80,How long we keep your data for,present
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,contact_dpo,missing,0.04,Citizens Advice privacy policy,missing
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,third_parties,missing,0.04,When you support us through fundraising activities,missing
+https://www.citizensadvice.org.uk/about-us/about-us1/citizens-advice-privacy-policy/,complaints_ico,missing,0.34,When you make a complaint about our service,missing
+https://www.rspca.org.uk/utilities/privacy,controller,missing,0.04,"This privacy notice covers all personal data that is gathered by the Royal Society for the Prevention of Cruelty to Animals (RSPCA), charity number 219099.",present
+https://www.rspca.org.uk/utilities/privacy,purpose,present,0.63,What we use your information for,present
+https://www.rspca.org.uk/utilities/privacy,lawful_basis,present,0.73,The law requires us to only process personal data where we have a valid legal basis for doing so.,present
+https://www.rspca.org.uk/utilities/privacy,rights,present,0.70,You can change your mind at any time about how we contact you or ask us to stop contacting you.,present
+https://www.rspca.org.uk/utilities/privacy,retention,present,0.73,How long we keep your information,present
+https://www.rspca.org.uk/utilities/privacy,contact_dpo,present,0.64,Please contact us if you have any questions about our Privacy Policy or any information we hold about you.,present
+https://www.rspca.org.uk/utilities/privacy,third_parties,present,0.84,Sharing your information with third parties,present
+https://www.rspca.org.uk/utilities/privacy,complaints_ico,missing,0.04,Contact us to report cruelty or for animal welfare advice.,missing
+https://www.theguardian.com/help/privacy-policy,controller,present,0.50,"Guardian News & Media Limited, Kings Place, 90 York Way, London N1 9GU is the data controller in respect of personal data that we collect from you.",present
+https://www.theguardian.com/help/privacy-policy,purpose,present,0.73,"For example, we may need to use it to answer your queries about a product or service and as a result may keep your personal data while you are still using our product or service.",present
+https://www.theguardian.com/help/privacy-policy,lawful_basis,present,0.78,"For example, we will rely on consent to:",present
+https://www.theguardian.com/help/privacy-policy,rights,present,0.80,You have the right to ask us to delete your personal data or restrict how it is used.,present
+https://www.theguardian.com/help/privacy-policy,retention,present,0.77,We keep your personal data for only as long as we need to.,present
+https://www.theguardian.com/help/privacy-policy,contact_dpo,present,0.74,"If you have any questions or concerns about how we use your personal data, please contact the Data Protection Team, by email at",present
+https://www.theguardian.com/help/privacy-policy,third_parties,present,0.79,Examples of when we may share your personal data with service providers include sharing with:,present
+https://www.theguardian.com/help/privacy-policy,complaints_ico,present,0.53,"If you have contacted us at dataprotection@theguardian.com with a privacy related complaint and you are not satisfied with our handling of that complaint, you may refer that complaint to the Office of the Australian Information Commissioner:",present
+https://www.royalmail.com/privacy-notice,controller,present,0.55,We will usually be the ‘data controller’ responsible for how and why personal data is used.,present
+https://www.royalmail.com/privacy-notice,purpose,present,0.80,"We also need to use your data to help us follow regulations, including to check levels of customer satisfaction.",present
+https://www.royalmail.com/privacy-notice,lawful_basis,present,0.78,Legitimate interests and legal obligation – We may need to use your data to help us meet health and safety requirements and our legal duty to protect our workforce.,present
+https://www.royalmail.com/privacy-notice,rights,present,0.75,The right to have your data deleted,present
+https://www.royalmail.com/privacy-notice,retention,present,0.75,How long we keep your personal data for,present
+https://www.royalmail.com/privacy-notice,contact_dpo,present,0.60,Please see section 11 to find out how to contact us.,present
+https://www.royalmail.com/privacy-notice,third_parties,present,0.82,We will only share your contact information with the third-party provider if you go ahead with your application.,present
+https://www.royalmail.com/privacy-notice,complaints_ico,present,0.71,You can also complain to the Information Commissioner’s Office at the following address.,present
+https://www.bt.com/privacy-policy,controller,present,0.58,mean either British Telecommunications plc or EE Limited.,present
+https://www.bt.com/privacy-policy,purpose,present,0.87,"For operational purposes to resolve technical issues/troubleshooting on set-top boxes, to maintain and improve the platform and track successful delivery and installation and to improve customer experience",present
+https://www.bt.com/privacy-policy,lawful_basis,present,0.77,OUR LEGAL BASIS FOR USING YOUR PERSONAL INFORMATION,present
+https://www.bt.com/privacy-policy,rights,present,0.75,If you want us to stop using personal information we’ve collected via,present
+https://www.bt.com/privacy-policy,retention,present,0.75,How long do we keep your personal information?,present
+https://www.bt.com/privacy-policy,contact_dpo,present,0.78,"If you have any questions about this, please contact us using the details below.",present
+https://www.bt.com/privacy-policy,third_parties,present,0.80,We share your personal information with other organisations for the following reasons:,present
+https://www.bt.com/privacy-policy,complaints_ico,present,0.66,"If you are still not satisfied after our response or believe we are not using your personal information in line with the law, you have the right to complain to the Information Commissioner, the regulator in the UK.",present
+https://monzo.com/legal/privacy-notice,controller,present,0.65,Registered in England and Wales with company number: 2425920.,present
+https://monzo.com/legal/privacy-notice,purpose,present,0.86,use information for analytics and service improvement of our products and services.,present
+https://monzo.com/legal/privacy-notice,lawful_basis,present,0.80,"At least one of the following must apply: contractual or legal duty, legitimate interest, public interest, vital individual interest or consent.",present
+https://monzo.com/legal/privacy-notice,rights,present,0.71,You have the right to object to this processing and can do so by turning off personalised marketing in the app,present
+https://monzo.com/legal/privacy-notice,retention,present,0.75,How long we keep your information 📁,present
+https://monzo.com/legal/privacy-notice,contact_dpo,present,0.75,"For any questions, please contact us however you prefer:",present
+https://monzo.com/legal/privacy-notice,third_parties,present,0.80,may also exclude ads on this basis by sharing limited data with third parties,present
+https://monzo.com/legal/privacy-notice,complaints_ico,present,0.75,"If you're still not happy, you can refer your complaint to the Information Commissioner’s Office (ICO), the UK regulator for data protection issues.",present
+https://www.asos.com/privacy-policy/,controller,present,0.58,"For all ASOS services, the data controller – the company that’s responsible for protecting your privacy – is ASOS.com Limited.",present
+https://www.asos.com/privacy-policy/,purpose,present,0.80,"For others, such as our customer service surveys, product reviews, or feedback requests, it's in both your and our best interests for us to send them to you so that we can improve our services and products for you.",present
+https://www.asos.com/privacy-policy/,lawful_basis,present,0.69,"It’s in our best interests to protect our service, to protect you and to stop this, and we also have a legal obligation to do so",present
+https://www.asos.com/privacy-policy/,rights,present,0.79,Would like us to stop using your information,present
+https://www.asos.com/privacy-policy/,retention,present,0.71,We’ll only hold on to your information for as long as you are a customer.,present
+https://www.asos.com/privacy-policy/,contact_dpo,present,0.67,You can contact our data protection team directly by emailing,present
+https://www.asos.com/privacy-policy/,third_parties,present,0.75,We use a third party to provide,present
+https://www.asos.com/privacy-policy/,complaints_ico,present,0.72,"The right to complain to your data protection regulator — in the UK, the Information Commissioner’s Office",present
+https://www.argos.co.uk/help/privacy-policy,controller,missing,0.24,"The Sainsbury's Group currently includes Sainsbury's Supermarkets, Sainsbury's Bank, Argos, Tu Clothing, Habitat and Nectar.",missing
+https://www.argos.co.uk/help/privacy-policy,purpose,present,0.56,And we do this to encourage you to buy our products and services by sending you offers and ideas that we feel will be of benefit to you.,present
+https://www.argos.co.uk/help/privacy-policy,lawful_basis,present,0.66,Our legal basis for processing your personal data,present
+https://www.argos.co.uk/help/privacy-policy,rights,present,0.75,You have a number of rights over your personal data.,present
+https://www.argos.co.uk/help/privacy-policy,retention,present,0.75,How long will we keep your personal information for?,present
+https://www.argos.co.uk/help/privacy-policy,contact_dpo,missing,0.03,We do not aim any of our products or services directly at children and we do not knowingly collect personal data of children.,missing
+https://www.argos.co.uk/help/privacy-policy,third_parties,present,0.79,Who might we share your personal information with?,present
+https://www.argos.co.uk/help/privacy-policy,complaints_ico,missing,0.01,"If you don't want to read all the detail, here are the things we think you'd really want to know:",missing
+https://deliveroo.co.uk/privacy,controller,missing,0.21,", The River Building, 1 Cousin Lane, London, EC4R 3TE, United Kingdom.",present
+https://deliveroo.co.uk/privacy,purpose,present,0.67,We use automated systems to detect and prevent fraud and abuses of our Sites and to manage customer operations and key elements of our contract with you.,present
+https://deliveroo.co.uk/privacy,lawful_basis,missing,0.30,"You know us as Deliveroo, but our legal name is Roofoods Ltd (“",unclear
+https://deliveroo.co.uk/privacy,rights,present,0.70,You have certain rights over the information we hold about you.,present
+https://deliveroo.co.uk/privacy,retention,present,0.67,"We will only retain your information for as long as reasonably necessary to fulfil the purposes we collected it for, and for the purposes of satisfying any legal, regulatory, tax, accounting or reporting requirements.",present
+https://deliveroo.co.uk/privacy,contact_dpo,present,0.54,"If you have any queries or requests about this privacy policy or how we handle your information more generally, you can get in touch by contacting us using our contact form available",present
+https://deliveroo.co.uk/privacy,third_parties,present,0.69,"In addition, we limit access to your information to those riders, third party providers and Deliveroo employees who have a business need-to-know.",present
+https://deliveroo.co.uk/privacy,complaints_ico,missing,0.08,"In the event of a complaint or if we reasonably believe there is a prospect of litigation in respect to our relationship with you, we may retain your information for a longer period.",unclear
+https://policies.google.com/privacy?hl=en-GB,controller,present,0.58,data controller responsible for processing your information,present
+https://policies.google.com/privacy?hl=en-GB,purpose,present,0.84,We analyse data about your interactions with our services to help us build better products.,present
+https://policies.google.com/privacy?hl=en-GB,lawful_basis,present,0.73,We process your data when we have a legal obligation to do so.,present
+https://policies.google.com/privacy?hl=en-GB,rights,present,0.75,"To delete your information, you can:",present
+https://policies.google.com/privacy?hl=en-GB,retention,present,0.54,"We keep some data until you delete your Google Account, such as information about how often you use our services.",present
+https://policies.google.com/privacy?hl=en-GB,contact_dpo,present,0.68,you can contact Google and our data protection office,present
+https://policies.google.com/privacy?hl=en-GB,third_parties,present,0.80,We may share non-personally identifiable information with our partners like content licensors to accompany royalty payments.,present
+https://policies.google.com/privacy?hl=en-GB,complaints_ico,present,0.42,"When we receive formal written complaints, we respond by contacting the person who made the complaint.",present
+https://www.spotify.com/uk/legal/privacy-policy/,controller,present,0.52,Spotify AB is the data controller of personal data processed under this Policy.,present
+https://www.spotify.com/uk/legal/privacy-policy/,purpose,present,0.75,"This allows us to deliver more relevant ads and marketing, and measure their performance.",present
+https://www.spotify.com/uk/legal/privacy-policy/,lawful_basis,present,0.77,Legal basis that permits the purpose,present
+https://www.spotify.com/uk/legal/privacy-policy/,rights,present,0.78,It's your right to request that we delete certain of your personal data.,present
+https://www.spotify.com/uk/legal/privacy-policy/,retention,present,0.69,Data retained for extended time periods for limited purposes,present
+https://www.spotify.com/uk/legal/privacy-policy/,contact_dpo,present,0.69,"For any questions or concerns about this Policy, contact our Data Protection Officer any one of these ways:",present
+https://www.spotify.com/uk/legal/privacy-policy/,third_parties,present,0.80,"If you choose to pay through third parties or by invoice, we may get data from our payment partners.",present
+https://www.spotify.com/uk/legal/privacy-policy/,complaints_ico,missing,0.09,When you download your data you will receive the information about your data that Spotify has to provide under Article 15 of the GDPR.,present
+https://www.mozilla.org/en-GB/privacy/websites/,controller,missing,0.14,"Mozilla Glean, our first-party telemetry and analytics platform.",unclear
+https://www.mozilla.org/en-GB/privacy/websites/,purpose,present,0.72,This information helps us understand the effectiveness of our advertising campaigns and improve them.,present
+https://www.mozilla.org/en-GB/privacy/websites/,lawful_basis,missing,0.22,"to handle employment and intern applications, and",missing
+https://www.mozilla.org/en-GB/privacy/websites/,rights,present,0.63,You can also unsubscribe via the,present
+https://www.mozilla.org/en-GB/privacy/websites/,retention,present,0.68,"to email receipts and store records, which are retained for 10 years from the date of last payment.",present
+https://www.mozilla.org/en-GB/privacy/websites/,contact_dpo,present,0.73,"If you have any other questions regarding personal data or our privacy practices, please contact us at",present
+https://www.mozilla.org/en-GB/privacy/websites/,third_parties,present,0.80,These transactions are often handled by Mozilla’s third-party vendors.,present
+https://www.mozilla.org/en-GB/privacy/websites/,complaints_ico,missing,0.04,"In addition, if you have configured your browser to send a “Do Not Track” signal when accessing our websites, Mozilla will not utilize any of the tools described in the",missing
