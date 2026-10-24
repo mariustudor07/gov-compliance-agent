@@ -88,6 +88,8 @@ def rule_for(finding_id):
         return "SEC-HSTS"
     if finding_id == "sec-mixed-content":
         return "SEC-MIXED"
+    if finding_id == "sec-security-txt":
+        return "SEC-DISCLOSURE"
     if finding_id.startswith("sec-"):
         return "SEC-HEADERS"
     return None

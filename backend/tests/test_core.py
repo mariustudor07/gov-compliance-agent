@@ -99,3 +99,8 @@ def test_redirect_to_another_website_is_detected():
     assert not _other_site("https://gov.uk", "https://www.gov.uk/")
     assert not _other_site("https://hub.encodeclub.com", "https://encodeclub.com/")
     assert not _other_site("https://motorlog.app", "https://motorlog.app/quick-check")
+
+
+def test_security_txt_rule_and_rank():
+    assert rule_for("sec-security-txt") == "SEC-DISCLOSURE"
+    assert rank(f("sec-security-txt", "low"), "https://example.com")[0] == "low"

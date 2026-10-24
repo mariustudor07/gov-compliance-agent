@@ -63,6 +63,11 @@ LEGAL_SOURCES = [
      "Src_URL": "https://www.ncsc.gov.uk/guidance/using-tls-to-protect-data",
      "Src_Version": "as read on review date; original publication date not verified",
      "Status": "under review", "Published_At": TODAY, "Reviewed_At": TODAY},
+    {"Src_ID": "NCSC-VDP", "Src_Title": "Vulnerability Disclosure Toolkit", "Src_Type": "guidance",
+     "Juristiction": "UK", "Src_Publisher": "National Cyber Security Centre",
+     "Src_URL": "https://www.ncsc.gov.uk/information/vulnerability-disclosure-toolkit",
+     "Src_Version": "as read on review date; original publication date not verified",
+     "Status": "under review", "Published_At": TODAY, "Reviewed_At": TODAY},
     {"Src_ID": "ICO-PECR", "Src_Title": "Guide to PECR: cookies and similar technologies", "Src_Type": "guidance",
      "Juristiction": "UK", "Src_Publisher": "Information Commissioner's Office",
      "Src_URL": "https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guide-to-pecr/",
@@ -115,6 +120,9 @@ COMPLIANCE_RULES = [
     _rule("SEC-HEADERS", "Basic security headers are set", "security", "NCSC-TLS",
           "CSP, X-Content-Type-Options, frame-ancestors", "http_headers", "Medium",
           "Protection against script injection, content sniffing and clickjacking."),
+    _rule("SEC-DISCLOSURE", "A vulnerability disclosure contact is published", "security", "NCSC-VDP",
+          "/.well-known/security.txt (RFC 9116) with a Contact: line", "http_fetch", "low",
+          "Security researchers can find out how to report a flaw safely."),
     _rule("SEC-MIXED", "No mixed content", "security", "NCSC-TLS", "No http:// resources on https:// pages",
           "html_parse", "High", "Every script, stylesheet, image and frame loaded over HTTPS."),
 ]
@@ -137,6 +145,7 @@ PROVISIONS = {
     "A11Y-STATEMENT": ["https://www.legislation.gov.uk/uksi/2018/952/regulation/8"],
     # NCSC guidance isn't law; the legal hook for basic web security is UK GDPR Article 32.
     "SEC-TLS": [GDPR + "32"], "SEC-HSTS": [GDPR + "32"], "SEC-HEADERS": [GDPR + "32"], "SEC-MIXED": [GDPR + "32"],
+    "SEC-DISCLOSURE": [GDPR + "32"],
 }
 MAX_LEGAL_TEXT = 12000  # characters stored per rule
 

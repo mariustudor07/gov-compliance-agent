@@ -1,8 +1,11 @@
 """Basic web security checks (NCSC guidance)."""
+import re
 import socket
 import ssl
 from datetime import datetime, timezone
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
+
+import httpx
 
 from bs4 import BeautifulSoup
 
@@ -45,6 +48,7 @@ def check_security(crawl_result):
         present = [h for h in list(REQUIRED_HEADERS) + ["x-frame-options"] if h in headers]
         findings.append(finding("sec-pass", "security", "pass", "HTTPS and security headers in place",
                                 evidence="headers present: " + ", ".join(present), page=home["url"]))
+    findings += _security_txt(home["url"])  # after the pass check: it's a disclosure contact, not a header
     return findings
 
 
@@ -106,3 +110,37 @@ def _mixed_content(pages):
                     regulation="NCSC guidance: Using TLS to protect data",
                     fix="Load every script, stylesheet, image and frame over https://, and add "
                         "Content-Security-Policy: upgrade-insecure-requests.")]
+
+
+def _security_txt(site_url):
+    """RFC 9116 security.txt: how to report a vulnerability (recommended by the NCSC). One passive request.
+    Checks the content, not just that the address answers: single-page apps return their homepage for any
+    address (motorlog.app does), which isn't a security.txt."""
+    url = urljoin(site_url, "/.well-known/security.txt")
+    try:
+        r = httpx.get(url, timeout=8, follow_redirects=True,
+                      headers={"User-Agent": "GovCheck compliance scanner"})
+    except Exception as e:
+        print(f"security.txt check skipped for {site_url}: {e}")
+        return []
+    text = r.text[:20000] if r.status_code == 200 else ""
+    if "<html" in text[:1000].lower() or not re.search(r"(?im)^\s*Contact:\s*\S+", text):
+        why = ("the address returns a web page, not a security.txt" if "<html" in text[:1000].lower()
+               else f"HTTP {r.status_code}" if r.status_code != 200 else "no Contact: line")
+        return [finding("sec-security-txt", "security", "low", "No security.txt (how to report a vulnerability)",
+                        evidence=f"{url}: {why}", page=site_url,
+                        regulation="NCSC Vulnerability Disclosure Toolkit; RFC 9116",
+                        fix="Publish /.well-known/security.txt with a Contact: line (an email address or a form) "
+                            "and an Expires: date, e.g. 'Contact: mailto:security@example.com'.")]
+    expires = re.search(r"(?im)^\s*Expires:\s*(\S+)", text)
+    if expires:
+        try:
+            when = datetime.fromisoformat(expires.group(1).replace("Z", "+00:00"))
+            if when.tzinfo and when < datetime.now(timezone.utc):
+                return [finding("sec-security-txt", "security", "low", "security.txt has expired",
+                                evidence=f"Expires: {expires.group(1)}", page=site_url,
+                                regulation="NCSC Vulnerability Disclosure Toolkit; RFC 9116",
+                                fix="Update the Expires: date in /.well-known/security.txt (at most a year ahead).")]
+        except ValueError:
+            pass
+    return []

@@ -40,6 +40,8 @@ FIXED = {
     "sec-content-security-policy": ("medium", "A missing safety net, not a vulnerability: no cross-site scripting (XSS) was found or "
                                               "tested for, but a CSP would limit the damage if one existed (OWASP ZAP: Medium)."),
     "sec-clickjacking": ("medium", "Another site could embed this one in a hidden frame and trick users into clicking (OWASP ZAP: Medium)."),
+    "sec-security-txt": ("low", "Good practice recommended by the NCSC: without a published contact, people who "
+                                "find a security flaw may not know how to report it safely."),
     "sec-x-content-type-options": ("low", "Blocks a narrow class of browser content-sniffing attacks (OWASP ZAP: Low)."),
     # cookies (PECR reg. 6)
     "ck-policy": ("medium", "PECR requires clear information about every cookie; without a cookie policy visitors can't make an informed choice."),
