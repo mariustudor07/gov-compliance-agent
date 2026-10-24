@@ -136,6 +136,14 @@ def summarise(findings):
         return "No compliance problems found in the areas we check."
     counts = {s: sum(f["severity"] == s for f in problems) for s in ("critical", "high", "medium", "low")}
     parts = [f"{n} {s}" for s, n in counts.items() if n]
-    worst = sorted(problems, key=lambda f: ["critical", "high", "medium", "low"].index(f["severity"]))[:3]
-    return (f"We found {len(problems)} issues ({', '.join(parts)}). "
-            f"Fix these first: {'; '.join(f['title'] for f in worst)}.")
+    breakdown = ", ".join(parts[:-1]) + " and " + parts[-1] if len(parts) > 1 else parts[0]
+    areas = sorted({f["category"] for f in problems if f["severity"] in ("critical", "high")})
+    issue_word = "issue" if len(problems) == 1 else "issues"
+    summary = f"We found {len(problems)} {issue_word}: {breakdown}."
+    if areas:
+        summary += f" The most serious are in {_join(areas)}, so start there."
+    return summary
+
+
+def _join(words):
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]

@@ -16,18 +16,42 @@ def run_axe(page):
         return []
 
 
+# Plain-English titles for common axe rules; anything else uses axe's own wording.
+PLAIN_TITLES = {
+    "color-contrast": "Text with too little colour contrast to read easily",
+    "button-name": "Buttons with no label that screen readers can announce",
+    "image-alt": "Images with no text description",
+    "link-name": "Links with no text saying where they go",
+    "label": "Form fields with no label",
+    "html-has-lang": "Page doesn't declare its language",
+    "document-title": "Page has no title",
+    "heading-order": "Headings skip levels",
+    "region": "Content outside the page's main landmarks",
+    "landmark-one-main": "Page has no main content landmark",
+    "meta-viewport": "Zooming is disabled",
+}
+
+
 def check_accessibility(crawl_result):
-    findings = []
+    # The same problem on several pages becomes ONE finding ("7 elements on 2 pages"), not one per page.
+    by_rule = {}
     for page in crawl_result["pages"]:
         for v in page["axe_violations"]:
-            findings.append(finding(
-                f"a11y-{v['id']}-{len(findings)}", "accessibility",
-                SEVERITY.get(v.get("impact"), "medium"),
-                f"{v['help']} ({len(v['nodes'])} element(s))",
-                evidence=v["nodes"][0]["html"][:200] if v["nodes"] else "",
-                page=page["url"], regulation="WCAG 2.2 AA"))
+            entry = by_rule.setdefault(v["id"], {"violation": v, "pages": [], "elements": 0})
+            entry["pages"].append(page["url"])
+            entry["elements"] += len(v["nodes"])
 
-    # TODO(Rolef): merge the same violation across pages so the report isn't repetitive
+    findings = []
+    for n, (rule, entry) in enumerate(by_rule.items()):
+        v, count, pages = entry["violation"], entry["elements"], entry["pages"]
+        where = f"{count} element{'s' if count != 1 else ''}" + (f" on {len(pages)} pages" if len(pages) > 1 else "")
+        findings.append(finding(
+            f"a11y-{rule}-{n}", "accessibility",
+            SEVERITY.get(v.get("impact"), "medium"),
+            f"{PLAIN_TITLES.get(rule, v['help'])} ({where})",
+            evidence=v["nodes"][0]["html"][:200] if v["nodes"] else "",
+            page=pages[0], regulation="WCAG 2.2 AA"))
+
     # TODO(Rolef): finding if no page looks like an accessibility statement
     #   (required by the Public Sector Bodies Accessibility Regulations 2018)
 
