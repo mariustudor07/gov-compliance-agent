@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from google import genai
 from google.genai import types
 
-from db.regulations import search_regulations
+from db.regulations import search_regulations_batch
 from ml.classify import missing_clauses, model_name
 from scanner.findings import finding
 from scanner.scan import run_scan
@@ -14,11 +14,13 @@ from scanner.scan import run_scan
 from .banner import check_banner
 from .fallback import privacy_via_gemini
 from .fixes import apply_fixes, summarise
+from .ranking import rank_all
 from .prompts import CLAUSE_TITLES, SYSTEM_PROMPT
 from .scoring import score
 
 
-def analyse(url):
+def analyse(url, store=None):
+    """store: the scan's AgentStore after store.begin(url), so database reads during the scan belong to it."""
     scan = run_scan(url)
     if scan["blocked"]:
         # Honest "couldn't scan" result: we never blame a site for its bot protection. If Gemini is
@@ -29,7 +31,7 @@ def analyse(url):
         findings, scores = [], {}
         if fallback:
             privacy_url, findings = fallback
-            findings = apply_fixes(findings)
+            findings = rank_all(apply_fixes(findings), url)
             scores = {"privacy": score(findings)["privacy"]}
             summary += (" Instead, Gemini read the privacy notice through Google and our classifier checked "
                         "what it found, so only the privacy section is covered. Cookies, accessibility and "
@@ -49,8 +51,9 @@ def analyse(url):
     scanner_findings = scan["findings"]
     if banner:  # Gemini judged the banner from a screenshot: use that instead of the HTML check, so it isn't penalised twice
         scanner_findings = [f for f in scanner_findings if f["id"] != "ck-banner"]
-    findings = apply_fixes(scanner_findings + banner + _privacy_findings(scan))
-    summary = _explain_with_gemini(url, findings) or summarise(findings)
+    # fix library first, then the ranking has the final say on severity (docs/ranking.md)
+    findings = rank_all(apply_fixes(scanner_findings + banner + _privacy_findings(scan)), url)
+    summary = _explain_with_gemini(url, findings, store) or summarise(findings)
 
     return {
         "url": url,
@@ -70,6 +73,10 @@ def _privacy_findings(scan):
     """Runs OUR classifier on the privacy policy."""
     page = scan["privacy_page"]
     if not scan["privacy_text"]:
+        # Our crawler may just have missed the link: let Gemini look via Google before calling it critical.
+        fallback = privacy_via_gemini(scan["pages_crawled"][0])
+        if fallback:
+            return fallback[1]
         return [finding("pv-none", "privacy", "critical", "No privacy notice found",
                         evidence="no privacy page linked from the homepage", regulation="UK GDPR Art. 13")]
     words = len(scan["privacy_text"].split())
@@ -96,22 +103,22 @@ def _privacy_findings(scan):
             for clause in missing]
 
 
-def _explain_with_gemini(url, findings):
+def _explain_with_gemini(url, findings, store=None):
     """Gemini adds a regulation + fix to each finding and writes the summary.
-    It can call search_regulations() itself to look up the law in MongoDB."""
+    Each finding comes with the matching UK rule and legal text, found by MongoDB Vector Search."""
     if not os.getenv("GEMINI_API_KEY") or not os.getenv("GEMINI_MODEL"):
         return ""  # built-in fixes and summary are used instead
 
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-    problems = [f for f in findings if f["severity"] != "pass"]
+    problems = [dict(f) for f in findings if f["severity"] != "pass"]
+    for problem, law in zip(problems, search_regulations_batch([f"{p['title']}. {p['evidence']}" for p in problems], store=store)):
+        if law:
+            problem["law"] = law  # the rule + legal text Vector Search matched, for Gemini to cite
     try:
         response = client.models.generate_content(
             model=os.environ["GEMINI_MODEL"],
             contents=f"Website: {url}\n\nFindings:\n{json.dumps(problems, indent=2)}",
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                tools=[search_regulations],  # the SDK runs the tool calls for us
-            ),
+            config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
         )
     except Exception as e:
         print(f"Gemini failed, using built-in fixes: {e}")

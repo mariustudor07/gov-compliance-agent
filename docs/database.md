@@ -56,3 +56,79 @@ The collections were empty, so nothing was lost. Original validators: `docs/db_v
 `Legal_Sources` and `Compliance_Rules` are empty, and the AI may not write to them. **A person** has to fill
 them (Bogdan, or an admin script run by hand, never by the app). Every finding needs a `Rule_ID`, so we need
 at least one rule per finding type (privacy clauses, cookies, accessibility, security).
+
+## How the app uses it (built 24 Oct)
+- `backend/db/seed.py`: **admin script, run by hand** (`python -m db.seed`): fills Legal_Sources (7: UK GDPR,
+  DPA 2018, PECR, PSBAR 2018, WCAG 2.2, NCSC TLS guidance, ICO PECR guidance) and Compliance_Rules (18, one per
+  kind of finding). Safe to re-run. NCSC/ICO guidance dates aren't verified, so those two are `under review`.
+- `backend/db/agent_store.py`: the AI agent's only way into the database. `save_scan()` runs the workflow
+  above; every operation goes through the permission table (forbidden ones raise `PermissionError`) and
+  writes an Audit_Events entry. Tested: writing the law, changing a rule, deleting, modifying a scan and
+  editing the audit log are all refused.
+- `POST /scan` saves each result (a database error never breaks the report); `GET /scans` and
+  `GET /scans/{id}` feed the History page (website reads, not the agent, so not audited).
+- First data: motorlog.app, gov.uk, bbc.co.uk, theguardian.com: 4 projects, 4 scans, 35 findings, 143 events.
+
+## Added 24 Oct, ~21:30
+- **Compliance_Rules** gained `Legal_Text` (the current wording, fetched from legislation.gov.uk by the seed),
+  `Legal_Text_URLs` and `Legal_Text_Fetched_At`. Extra fields are allowed by the validators; nothing removed.
+  A11Y-WCAG now cites PSBAR **reg. 6** (the duty); reg. 3 is only definitions.
+- **Legal_Sources** +2: Data (Use and Access) Act 2025 (amended PECR, e.g. Schedule A1) and Equality Act 2010.
+  Dates checked on legislation.gov.uk: Royal Assent for Acts, "made" date for regulations.
+- **Training_Labels** (new collection, own validator, unique `Label_ID`): our labelled sentences
+  (`data/labels.csv`, 765 rows -> 750 unique). Not in the agent's permission table, so the agent can't touch it.
+- **Audit_Events.details** now records what the agent did (Bogdan's note): `what`, `reason`, `collection`,
+  `agent`, `scan_id`, `website`, plus `query` (reads), `fields_set` (creates) or `changes` from/to (updates).
+  Updates that change nothing are neither written nor logged. Events from before this change have the
+  older short `details`; audit records are never rewritten.
+
+## Vector Search (24 Oct, ~22:00)
+- `python -m db.embed_rules` (admin, by hand): Voyage AI `voyage-3.5` embeddings (1024 dims) of each rule's
+  title, requirement, description and legal text, stored in `Compliance_Rules.Embedding`; creates the Atlas
+  Vector Search index **`rules_vector`** (cosine) if missing. Re-run after `db.seed` if the legal text changes.
+- The Voyage account has no payment method, so it's limited to 3 requests / 10K tokens a minute: the script
+  embeds in batches, and a scan embeds all its findings in **one** request (`AgentStore.search_rules_batch`).
+- During a scan, every finding gets the closest rules + legal text from Vector Search, and Gemini cites them
+  (e.g. "PECR reg. 6(2) and Schedule A1"). Each rule read is an `accessed` audit event with the similarity score.
+
+## Database users (.env)
+`MONGODB_HOST`, `MONGODB_APP_USER`/`MONGODB_APP_PASSWORD` (restricted role, used by the app and the agent) and
+`MONGODB_ADMIN_USER`/`MONGODB_ADMIN_PASSWORD` (full access, only for `db.seed` / `db.embed_rules`). Passwords
+are URL-encoded by `db/client.py`. While the app user is empty, `MONGODB_URI` is used for everything.
+
+## Search indexes (if one gets deleted)
+Run `python -m db.search_indexes` (admin, from `backend/`). It recreates any missing index and leaves existing
+ones alone: **`rules_vector`** (Vector Search on `Compliance_Rules.Embedding`, 1024 dims, cosine) and
+**`findings_text`** (Atlas Search on `Findings`: Explanation, Reccomendation, Evidence.title/text as text;
+Rule_ID, Severity as tokens). 24 Oct ~22:30: `rules_vector` had been deleted; recreated, and `findings_text` added.
+
+## Restricted app user: verified (24 Oct, ~22:50)
+The app now connects as **`govcheck_app`** (Bogdan's custom role); scripts run as the admin user. Every
+read/write/modify/delete was attempted directly against Atlas (bypassing our code) without changing data:
+the role matches the permission table exactly (Atlas answers "user is not allowed to do action [...]"
+otherwise), and Training_Labels is fully off-limits. A full scan (Gemini + Vector Search) saves fine under it.
+So the permissions are enforced twice: in `AgentStore` and by Atlas itself.
+
+## Checked against Bogdan's paper design (24 Oct, ~00:15)
+| On paper | In Atlas / code | |
+|---|---|---|
+| 1. Create project: ID, creation date, statuses, "Scanned" defaults to unscanned | `Projects` created with `Project_Status = "unscanned"` | ✅ |
+| Creation Event: "set details of what the agent did" | every event's `details`: what, reason, scan, website, agent, fields/query/from→to | ✅ |
+| 2. Compliance scope informs what's scanned; query Legal_Sources for project-relevant sources (accessed event) | sources matched to the project's jurisdiction; `Compliance_Scope` picks the rules | ✅ (WCAG 2.2 was skipped until its jurisdiction said UK; fixed) |
+| Use sources + context to query Compliance_Rules (AE) | rules from those sources, in scope; + vector-search reads during the scan | ✅ |
+| 3. Create a new scan for the project (CE) | `Code_Scans` (Started_At = when step 1 began) | ✅ |
+| 4. Create findings documents (CE) | `Findings`, one per finding, linked to a rule | ✅ |
+| Key point: every access / modify / create by the AI → event; not for events themselves | all agent reads/writes go through `AgentStore`; events tagged with the scan | ✅ (vector-search reads used to come before the project and untagged; fixed: `begin()` → scan → `finish()`) |
+| Key point: AI may not write Legal_Sources / Compliance_Rules but can view them | code check + Atlas role `govcheck_agent` (verified) | ✅ |
+| Permission table (R/W/M/D) | identical in code and in Atlas | ✅ |
+
+| Top box **IND → AI**: an individual calls the AI | the person scanning on the website; events record `requested_by: "an individual via the website"` (anonymous on purpose: no IP addresses) | ✅ |
+| Bottom box **export → Usr**: the result goes back to the user | the report returned to the website, plus Dawan's PDF download | ✅ |
+
+**Decided for Bogdan (our reading of the diagram; easy to change in `db/agent_store.py` if he meant otherwise):**
+- *"Create a Source ID if the source is new"*: `Projects.Src_ID` links the project to the main law of its
+  jurisdiction (UK → `UKGDPR`, `GOVERNING_SOURCE`). Because the AI may not create legal sources (his permission table),
+  it **looks the source up** (logged as an accessed event) and, if it isn't in Legal_Sources, sets `PENDING-REVIEW`
+  for a person to add it. It never invents one.
+- *`Project_Status`*: **unscanned** (project created) → **scanned** (scan + findings saved) → **processed** (report
+  returned to the individual: the "export → Usr" step). Each change is an update event with from → to.

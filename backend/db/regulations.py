@@ -1,40 +1,44 @@
-"""search_regulations(query): finds the most relevant pieces of UK law with Atlas Vector Search.
-Gemini calls this as a tool, so keep the type hints and docstring."""
+"""search_regulations(query): finds the UK rule (and its legal text) that matches a compliance problem,
+using Voyage AI embeddings + Atlas Vector Search on Compliance_Rules (see db/embed_rules.py).
+
+Gemini calls this as a tool while writing the report, so keep the type hints and docstring. It goes
+through AgentStore, so Bogdan's permission table applies and every rule read is an audit event.
+"""
 import os
 
-import voyageai
+from .client import db_enabled
 
-from .client import db_enabled, get_db
-
-EMBED_MODEL = "voyage-3.5"
-INDEX_NAME = "regulations_vector"  # TODO(Bogdan): create this Vector Search index in Atlas on field "embedding"
+LAW_EXCERPT_CHARS = 1500
 
 
-def embed(texts: list[str], input_type: str) -> list[list[float]]:
-    client = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"])
-    return client.embed(texts, model=EMBED_MODEL, input_type=input_type).embeddings
+def _compact(rules):
+    return [{"rule_id": r["Rule_ID"], "title": r["Rule_Title"], "requirement": r["Requirement"],
+             "source": r["Src_ID"], "law": r.get("Legal_Text", "")[:LAW_EXCERPT_CHARS],
+             "law_url": (r.get("Legal_Text_URLs") or [""])[0]} for r in rules]
+
+
+def search_regulations_batch(queries: list[str], limit: int = 2, store=None) -> list[list[dict]]:
+    """The matching rules for several problems, using ONE Voyage request. [] per query if unavailable.
+    Pass the scan's AgentStore so the rule reads are logged as part of that scan."""
+    if not queries or not db_enabled() or not os.getenv("VOYAGE_API_KEY"):
+        return [[] for _ in queries]
+    try:
+        from .agent_store import AgentStore
+        return [_compact(rules) for rules in (store or AgentStore()).search_rules_batch(queries, limit)]
+    except Exception as e:
+        print(f"search_regulations failed: {e}")
+        return [[] for _ in queries]
 
 
 def search_regulations(query: str) -> list[dict]:
-    """Search UK regulations (UK GDPR, PECR, WCAG 2.2, Accessibility Regulations 2018, NCSC)
-    for the passages most relevant to a compliance problem.
+    """Search the UK rules GovCheck checks (UK GDPR, PECR, the 2018 accessibility regulations, WCAG 2.2,
+    NCSC guidance) for the ones most relevant to a compliance problem, with the actual legal text.
 
     Args:
         query: a description of the problem, e.g. "analytics cookies set before consent".
 
     Returns:
-        Up to 3 passages, each with source, section and text.
+        Up to 3 rules, each with rule_id, title, requirement, source, law (an excerpt of the legal text)
+        and law_url.
     """
-    if not db_enabled() or not os.getenv("VOYAGE_API_KEY"):
-        return []
-    pipeline = [
-        {"$vectorSearch": {"index": INDEX_NAME, "path": "embedding",
-                           "queryVector": embed([query], "query")[0],
-                           "numCandidates": 50, "limit": 3}},
-        {"$project": {"_id": 0, "source": 1, "section": 1, "text": 1}},
-    ]
-    try:
-        return list(get_db().regulations.aggregate(pipeline))
-    except Exception as e:
-        print(f"search_regulations failed: {e}")
-        return []
+    return search_regulations_batch([query], 3)[0]

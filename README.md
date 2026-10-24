@@ -113,11 +113,13 @@ gov-compliance-agent/
 │   │   ├── prompts.py            ← system prompt for Gemini
 │   │   └── scoring.py            ← findings → 0-100 scores
 │   │
-│   └── db/                       ── BOGDAN
-│       ├── client.py             ← get_db(): connects to MongoDB Atlas
-│       ├── repository.py         ← save_scan, get_scan, list_scans, find_recent_scan
-│       ├── regulations.py        ← search_regulations(query): Atlas Vector Search
-│       └── load_regulations.py   ← one-off script: chunk + embed laws into MongoDB
+│   └── db/                       ── BOGDAN (design) · details in docs/database.md
+│       ├── client.py             ← connections: restricted app user + admin user
+│       ├── agent_store.py        ← Bogdan's workflow, permission table, audit events, history reads
+│       ├── regulations.py        ← search_regulations(): Voyage AI + Atlas Vector Search
+│       ├── seed.py               ← ADMIN: laws, rules (+ real legal text), training labels
+│       ├── embed_rules.py        ← ADMIN: Voyage embeddings + vector index
+│       └── search_indexes.py     ← ADMIN: recreate rules_vector / findings_text if deleted
 │
 └── frontend/                     ── DWAN  (React + Vite, created on day 1)
 ```
@@ -184,15 +186,13 @@ The backend also has a mock mode (`MOCK_SCAN=1` in `.env`) that returns that fil
 
 | # | Task | File | Done when |
 |---|---|---|---|
-| 1 | Get the $100 Atlas credit at the MongoDB booth; create a cluster | | |
-| 2 | Put the connection string in your `.env` and share it privately (DM, not git!) | `.env` | `python -c "from db.client import get_db; print(get_db().list_collection_names())"` works |
-| 3 | `save_scan`, `get_scan`, `list_scans`, `find_recent_scan` | `repository.py` | already drafted, test them |
-| 4 | Index on `url` + `scanned_at` | | |
-| 5 | Copy the law text into `data/regulations/*.txt` (UK GDPR Art. 5, 6, 12–22; PECR reg. 6; WCAG 2.2 AA success criteria; Accessibility Regs 2018) | `data/regulations/` | |
-| 6 | Chunk + embed them with Voyage AI into `regulations` collection | `load_regulations.py` | collection has documents with `embedding` |
-| 7 | Create the **Atlas Vector Search** index, finish `search_regulations` | `regulations.py` | `search_regulations("cookies without consent")` returns PECR reg. 6 |
-| 8 | **Atlas Search** index on scans → "find all sites with pre-consent cookies" | `repository.py` + API route | |
-| 9 | *Stretch:* Change Streams for live scan progress, Hybrid Search | | |
+| 1 | Atlas cluster, database `Audit_AI_Db`, 6 collections with strict validators | Atlas | ✅ |
+| 2 | Restricted `govcheck_app` user with a custom role matching the permission table | Atlas | ✅ verified |
+| 3 | Workflow + audit trail: project → law → rules → scan → findings → scanned | `agent_store.py` | ✅ |
+| 4 | Law and rules (with legal text from legislation.gov.uk) | `seed.py` | ✅ 9 sources, 18 rules |
+| 5 | **Voyage AI + Atlas Vector Search** on the rules | `embed_rules.py`, `regulations.py` | ✅ Gemini cites the matched law |
+| 6 | **Atlas Search** index on findings | `search_indexes.py` | ✅ index built, not used by the app yet |
+| 7 | *Stretch:* search box / Hybrid Search, Change Streams | | not done |
 
 ### 👥 Everyone
 - First hour: read this README, set up PyCharm (section 6), make your branch (section 7).
@@ -226,8 +226,8 @@ The backend also has a mock mode (`MOCK_SCAN=1` in `.env`) that returns that fil
 | AI lead | `ml.classify.missing_clauses(text)` | `["retention", "contact_dpo"]`, or `None` if the model isn't trained yet |
 | AI lead | `agent.agent.analyse(url)` | a full `ScanResult` dict |
 | Bogdan | `db.regulations.search_regulations(query)` | `[{"source": "PECR", "section": "reg. 6", "text": "..."}]` |
-| Bogdan | `db.repository.save_scan(result)` | the new scan's id (string) |
-| Bogdan | `db.repository.get_scan(id)` / `list_scans()` / `find_recent_scan(url)` | scan dict(s) or `None` |
+| AI lead | `db.agent_store.AgentStore().save_scan(result)` | the new scan's id (string) |
+| AI lead | `db.agent_store.get_scan(id)` / `list_scans()` | scan dict(s) or `None` |
 
 ### HTTP API (for Dawan). Runs at `http://127.0.0.1:8000`; interactive docs at `/docs`
 | Method | Path | Body | Returns |
