@@ -68,3 +68,16 @@ at least one rule per finding type (privacy clauses, cookies, accessibility, sec
 - `POST /scan` saves each result (a database error never breaks the report); `GET /scans` and
   `GET /scans/{id}` feed the History page (website reads, not the agent, so not audited).
 - First data: motorlog.app, gov.uk, bbc.co.uk, theguardian.com: 4 projects, 4 scans, 35 findings, 143 events.
+
+## Added 24 Oct, ~21:30
+- **Compliance_Rules** gained `Legal_Text` (the current wording, fetched from legislation.gov.uk by the seed),
+  `Legal_Text_URLs` and `Legal_Text_Fetched_At`. Extra fields are allowed by the validators; nothing removed.
+  A11Y-WCAG now cites PSBAR **reg. 6** (the duty); reg. 3 is only definitions.
+- **Legal_Sources** +2: Data (Use and Access) Act 2025 (amended PECR, e.g. Schedule A1) and Equality Act 2010.
+  Dates checked on legislation.gov.uk: Royal Assent for Acts, "made" date for regulations.
+- **Training_Labels** (new collection, own validator, unique `Label_ID`): our labelled sentences
+  (`data/labels.csv`, 765 rows -> 750 unique). Not in the agent's permission table, so the agent can't touch it.
+- **Audit_Events.details** now records what the agent did (Bogdan's note): `what`, `reason`, `collection`,
+  `agent`, `scan_id`, `website`, plus `query` (reads), `fields_set` (creates) or `changes` from/to (updates).
+  Updates that change nothing are neither written nor logged. Events from before this change have the
+  older short `details`; audit records are never rewritten.
