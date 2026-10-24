@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from google import genai
 from google.genai import types
 
-from db.regulations import search_regulations
+from db.regulations import search_regulations_batch
 from ml.classify import missing_clauses, model_name
 from scanner.findings import finding
 from scanner.scan import run_scan
@@ -98,20 +98,20 @@ def _privacy_findings(scan):
 
 def _explain_with_gemini(url, findings):
     """Gemini adds a regulation + fix to each finding and writes the summary.
-    It can call search_regulations() itself to look up the law in MongoDB."""
+    Each finding comes with the matching UK rule and legal text, found by MongoDB Vector Search."""
     if not os.getenv("GEMINI_API_KEY") or not os.getenv("GEMINI_MODEL"):
         return ""  # built-in fixes and summary are used instead
 
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-    problems = [f for f in findings if f["severity"] != "pass"]
+    problems = [dict(f) for f in findings if f["severity"] != "pass"]
+    for problem, law in zip(problems, search_regulations_batch([f"{p['title']}. {p['evidence']}" for p in problems])):
+        if law:
+            problem["law"] = law  # the rule + legal text Vector Search matched, for Gemini to cite
     try:
         response = client.models.generate_content(
             model=os.environ["GEMINI_MODEL"],
             contents=f"Website: {url}\n\nFindings:\n{json.dumps(problems, indent=2)}",
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                tools=[search_regulations],  # the SDK runs the tool calls for us
-            ),
+            config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
         )
     except Exception as e:
         print(f"Gemini failed, using built-in fixes: {e}")

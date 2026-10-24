@@ -132,6 +132,34 @@ class AgentStore:
         self._event("update", collection, entity_id, f"updated {ENTITY_TYPE[collection]} {entity_id}", why,
                     changes={k: {"from": str((before or {}).get(k)), "to": str(v)} for k, v in changes.items()})
 
+    def search_rules(self, text, limit=3):
+        """Atlas Vector Search: the rules whose meaning is closest to `text` (a problem the scan found)."""
+        return self.search_rules_batch([text], limit)[0]
+
+    def search_rules_batch(self, texts, limit=3):
+        """Vector Search for several problems at once. All texts are embedded in ONE Voyage request (the free
+        tier allows 3 requests a minute); the searches themselves run in MongoDB. A read of Compliance_Rules,
+        so it's permission-checked and every rule returned is logged."""
+        self._check("Compliance_Rules", "R")
+        if not texts:
+            return []
+        import voyageai
+        vectors = voyageai.Client(api_key=os.environ["VOYAGE_API_KEY"]).embed(
+            list(texts), model="voyage-3.5", input_type="query").embeddings
+        results = []
+        for text, vector in zip(texts, vectors):
+            rules = list(self.db.Compliance_Rules.aggregate([
+                {"$vectorSearch": {"index": "rules_vector", "path": "Embedding", "queryVector": vector,
+                                   "numCandidates": 50, "limit": limit}},
+                {"$project": {"_id": 0, "Rule_ID": 1, "Rule_Title": 1, "Requirement": 1, "Src_ID": 1,
+                              "Legal_Text": 1, "Legal_Text_URLs": 1, "score": {"$meta": "vectorSearchScore"}}}]))
+            for rule in rules:
+                self._event("accessed", "Compliance_Rules", rule["Rule_ID"], f"read Rule {rule['Rule_ID']}",
+                            "vector search for the rule matching a problem", search_text=text[:300],
+                            similarity=round(rule["score"], 3))
+            results.append(rules)
+        return results
+
     def delete(self, collection, entity_id):
         self._check(collection, "D")  # nothing allows D, so this always refuses
 

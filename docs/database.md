@@ -81,3 +81,17 @@ at least one rule per finding type (privacy clauses, cookies, accessibility, sec
   `agent`, `scan_id`, `website`, plus `query` (reads), `fields_set` (creates) or `changes` from/to (updates).
   Updates that change nothing are neither written nor logged. Events from before this change have the
   older short `details`; audit records are never rewritten.
+
+## Vector Search (24 Oct, ~22:00)
+- `python -m db.embed_rules` (admin, by hand): Voyage AI `voyage-3.5` embeddings (1024 dims) of each rule's
+  title, requirement, description and legal text, stored in `Compliance_Rules.Embedding`; creates the Atlas
+  Vector Search index **`rules_vector`** (cosine) if missing. Re-run after `db.seed` if the legal text changes.
+- The Voyage account has no payment method, so it's limited to 3 requests / 10K tokens a minute: the script
+  embeds in batches, and a scan embeds all its findings in **one** request (`AgentStore.search_rules_batch`).
+- During a scan, every finding gets the closest rules + legal text from Vector Search, and Gemini cites them
+  (e.g. "PECR reg. 6(2) and Schedule A1"). Each rule read is an `accessed` audit event with the similarity score.
+
+## Database users (.env)
+`MONGODB_HOST`, `MONGODB_APP_USER`/`MONGODB_APP_PASSWORD` (restricted role, used by the app and the agent) and
+`MONGODB_ADMIN_USER`/`MONGODB_ADMIN_PASSWORD` (full access, only for `db.seed` / `db.embed_rules`). Passwords
+are URL-encoded by `db/client.py`. While the app user is empty, `MONGODB_URI` is used for everything.

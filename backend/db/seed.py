@@ -8,14 +8,14 @@ Re-run it after the label review to update Training_Labels.
     cd backend
     python -m db.seed
 """
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pymongo import MongoClient
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+from .client import get_db  # noqa: E402
 
 TODAY = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -197,11 +197,15 @@ def import_labels(db):
 
 
 def main():
-    db = MongoClient(os.environ["MONGODB_URI"])[os.getenv("MONGODB_DB", "Audit_AI_Db")]
+    db = get_db("admin")  # the AI agent may not write the law: this runs as the admin user
     for src in LEGAL_SOURCES:
         db.Legal_Sources.replace_one({"Src_ID": src["Src_ID"]}, src, upsert=True)
     for rule in COMPLIANCE_RULES:
-        db.Compliance_Rules.replace_one({"Rule_ID": rule["Rule_ID"]}, add_legal_text(dict(rule)), upsert=True)
+        new = add_legal_text(dict(rule))
+        # keep the Voyage embedding from db.embed_rules (re-run that script if the legal text changed)
+        old = db.Compliance_Rules.find_one({"Rule_ID": rule["Rule_ID"]}, {"_id": 0, "Embedding": 1, "Embedding_Model": 1})
+        new.update(old or {})
+        db.Compliance_Rules.replace_one({"Rule_ID": rule["Rule_ID"]}, new, upsert=True)
     import_labels(db)
     with_text = db.Compliance_Rules.count_documents({"Legal_Text": {"$ne": ""}})
     print(f"Legal_Sources: {db.Legal_Sources.count_documents({})} | "
