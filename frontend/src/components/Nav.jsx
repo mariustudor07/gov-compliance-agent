@@ -6,7 +6,7 @@ export default function Nav() {
     <header className="nav">
       <NavLink to="/" className="nav__brand">
         <ShieldIcon width={20} height={20} />
-        Compliance Checker
+        GovCheck
       </NavLink>
       <nav className="nav__links">
         <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>

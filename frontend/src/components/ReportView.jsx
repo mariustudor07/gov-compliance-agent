@@ -1,8 +1,9 @@
 import ScoreTile from "./ScoreTile";
 import FindingCard from "./FindingCard";
 import SeverityDonut from "./SeverityDonut";
-import PriorityFixes from "./PriorityFixes";
+import ImprovementPlan from "./ImprovementPlan";
 import Reveal from "./Reveal";
+import DownloadPdfButton from "./DownloadPdfButton";
 import { ReportIcon, AccessibilityIcon, CookieIcon, EyeIcon, ShieldIcon, SparkleIcon } from "./icons";
 import { CATEGORY_LABEL, formatDate, groupBySeverity, countBySeverity } from "../lib/format";
 
@@ -43,9 +44,12 @@ export default function ReportView({ result, usingMock = false }) {
         </div>
       )}
 
-      <div className="report__head">
-        <h1>{url}</h1>
-        <p className="report__meta">Scanned {formatDate(scanned_at)}</p>
+      <div className="report__head report__head--with-action">
+        <div>
+          <h1>{url}</h1>
+          <p className="report__meta">Scanned {formatDate(scanned_at)}</p>
+        </div>
+        <DownloadPdfButton result={result} usingMock={usingMock} />
       </div>
 
       <div className="scores">
@@ -75,7 +79,7 @@ export default function ReportView({ result, usingMock = false }) {
         <SeverityDonut counts={counts} />
       </Reveal>
 
-      <PriorityFixes findings={findings} />
+      <ImprovementPlan findings={findings} scores={scores} />
 
       {grouped.map((group, groupIndex) => (
         <section key={group.severity} className="finding-group">

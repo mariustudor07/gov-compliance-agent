@@ -7,12 +7,14 @@ export default function Footer() {
       <div className="footer__row">
         <span className="footer__brand">
           <ShieldIcon width={16} height={16} />
-          Compliance Checker
+          GovCheck
         </span>
         <nav className="footer__links">
           <Link to="/docs">Docs</Link>
           <Link to="/docs#faq">FAQ</Link>
           <Link to="/privacy">Privacy</Link>
+          <Link to="/cookies">Cookies</Link>
+          <Link to="/accessibility">Accessibility</Link>
           <a href="https://github.com/mariustudor07/gov-compliance-agent" target="_blank" rel="noreferrer">
             GitHub
           </a>

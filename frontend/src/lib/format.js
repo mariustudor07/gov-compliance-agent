@@ -21,7 +21,7 @@ export const CATEGORY_COLOR = {
   accessibility: "#7c3aed", // violet
   cookies: "#b45309", // amber
   privacy: "#2563eb", // blue
-  security: "#059669", // emerald
+  security: "#047857", // emerald
   overall: "#4f46e5", // indigo, the brand colour
 };
 
