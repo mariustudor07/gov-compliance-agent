@@ -56,7 +56,7 @@ const SECTIONS = [
       "Baseline protections: HTTPS everywhere, HSTS, a Content-Security-Policy, clickjacking protection, and no mixed content. Art. 32 makes 'appropriate technical measures' a legal duty, not just good practice.",
     howWeCheck:
       "We inspect the live response headers and certificate on every page we visit: no guessing, no cached results.",
-    source: "https://www.ncsc.gov.uk/section/advice-guidance/all-advice-guidance",
+    source: "https://www.ncsc.gov.uk/guidance",
     sourceLabel: "Browse NCSC guidance",
   },
 ];
