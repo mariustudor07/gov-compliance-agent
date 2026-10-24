@@ -75,6 +75,17 @@ AXE_FIXES = {
 # Why each finding got its severity (shown in the report as "Why critical/high/...").
 SEVERITY_REASONS = {
     "ck-preconsent": "Tracking starts before the visitor can say no, so PECR consent is never actually given.",
+    "ck-banner": "Consent only counts if refusing is as easy as accepting; otherwise PECR consent isn't valid.",
+    "ck-policy": "PECR requires clear information about every cookie; without a cookie policy visitors can't "
+                 "make an informed choice.",
+    "a11y-statement": "Public sector websites are legally required to publish an accessibility statement "
+                      "(2018 Regulations, reg. 8).",
+    "a11y-not-run": "We couldn't test these pages automatically, so problems there may be unreported.",
+    "sec-certificate": "Browsers warn visitors away from sites with invalid or expiring certificates, and "
+                       "connections can't be trusted.",
+    "sec-tls-version": "Old TLS versions have known weaknesses that let attackers read or tamper with traffic.",
+    "sec-mixed-content": "Anything loaded over http:// can be read or replaced by an attacker on the network, "
+                         "undermining the page's HTTPS.",
     "ck-banner-noreject": "If refusing takes more effort than accepting, consent isn't freely given, so it isn't valid.",
     "ck-banner-unequal": "Nudging people towards 'Accept' with design undermines free choice, which the ICO "
                          "treats as invalid consent.",
@@ -110,12 +121,16 @@ AXE_SEVERITY_REASONS = {
 }
 
 
+# Rolef's accessibility findings that are not axe rules: keep their own (more specific) regulation.
+NON_AXE_IDS = {"a11y-statement", "a11y-not-run", "a11y-axe"}
+
+
 def apply_fixes(findings):
     """Fill in regulation, fix and severity_reason for every non-pass finding that doesn't have them yet."""
     for f in findings:
         if f["severity"] == "pass":
             continue
-        if f["id"].startswith("a11y-"):
+        if f["id"].startswith("a11y-") and f["id"] not in NON_AXE_IDS:
             rule = f["id"][len("a11y-"):].rsplit("-", 1)[0]
             regulation = "WCAG 2.2 AA (Public Sector Bodies Accessibility Regulations 2018)"
             fix = AXE_FIXES.get(rule, "Fix the elements listed in the evidence so they meet WCAG 2.2 AA.")

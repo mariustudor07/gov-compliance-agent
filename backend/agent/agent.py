@@ -32,7 +32,10 @@ def analyse(url):
                         "tools, so this says nothing about whether the site is compliant. It needs a manual check."),
         }
     banner = check_banner(scan["homepage_screenshot"], scan["pages_crawled"][0])
-    findings = apply_fixes(scan["findings"] + banner + _privacy_findings(scan))
+    scanner_findings = scan["findings"]
+    if banner:  # Gemini judged the banner from a screenshot: use that instead of the HTML check, so it isn't penalised twice
+        scanner_findings = [f for f in scanner_findings if f["id"] != "ck-banner"]
+    findings = apply_fixes(scanner_findings + banner + _privacy_findings(scan))
     summary = _explain_with_gemini(url, findings) or summarise(findings)
 
     return {

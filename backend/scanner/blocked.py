@@ -21,6 +21,6 @@ def blocked_reason(homepage):
         return f"the site refused automated access (HTTP {homepage['status']})"
     if words < 80 and BLOCK_TEXT.search(homepage["text"]):
         return "the site showed a bot-protection page instead of its content"
-    if words < 15:
+    if words == 0:  # truly blank (Boots); tiny real pages like badssl.com test sites ("expired. badssl.com") still get scanned
         return "the site showed a blank page to our scanner"
     return ""
