@@ -12,7 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
 from agent.agent import analyse  # noqa: E402
-from db import repository  # noqa: E402
+from db import agent_store  # noqa: E402
+from db.agent_store import AgentStore  # noqa: E402
 from db.client import db_enabled  # noqa: E402
 
 app = FastAPI(title="GovCheck")
@@ -32,25 +33,23 @@ def scan(req: ScanRequest):
         result["url"] = req.url
         return result
 
-    if db_enabled():
-        cached = repository.find_recent_scan(req.url)
-        if cached:
-            return cached
-
     result = analyse(req.url)
     if db_enabled():
-        result["id"] = repository.save_scan(result)
+        try:  # saving must never cost the user their report
+            result["id"] = AgentStore().save_scan(result)
+        except Exception as e:
+            print(f"Could not save scan to MongoDB: {e}")
     return result
 
 
 @app.get("/scans")
 def scans():
-    return repository.list_scans() if db_enabled() else []
+    return agent_store.list_scans() if db_enabled() else []
 
 
 @app.get("/scans/{scan_id}")
 def scan_by_id(scan_id: str):
-    result = repository.get_scan(scan_id) if db_enabled() else None
+    result = agent_store.get_scan(scan_id) if db_enabled() else None
     if not result:
         raise HTTPException(404, "Scan not found")
     return result

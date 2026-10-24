@@ -56,3 +56,15 @@ The collections were empty, so nothing was lost. Original validators: `docs/db_v
 `Legal_Sources` and `Compliance_Rules` are empty, and the AI may not write to them. **A person** has to fill
 them (Bogdan, or an admin script run by hand, never by the app). Every finding needs a `Rule_ID`, so we need
 at least one rule per finding type (privacy clauses, cookies, accessibility, security).
+
+## How the app uses it (built 24 Oct)
+- `backend/db/seed.py`: **admin script, run by hand** (`python -m db.seed`): fills Legal_Sources (7: UK GDPR,
+  DPA 2018, PECR, PSBAR 2018, WCAG 2.2, NCSC TLS guidance, ICO PECR guidance) and Compliance_Rules (18, one per
+  kind of finding). Safe to re-run. NCSC/ICO guidance dates aren't verified, so those two are `under review`.
+- `backend/db/agent_store.py`: the AI agent's only way into the database. `save_scan()` runs the workflow
+  above; every operation goes through the permission table (forbidden ones raise `PermissionError`) and
+  writes an Audit_Events entry. Tested: writing the law, changing a rule, deleting, modifying a scan and
+  editing the audit log are all refused.
+- `POST /scan` saves each result (a database error never breaks the report); `GET /scans` and
+  `GET /scans/{id}` feed the History page (website reads, not the agent, so not audited).
+- First data: motorlog.app, gov.uk, bbc.co.uk, theguardian.com: 4 projects, 4 scans, 35 findings, 143 events.
