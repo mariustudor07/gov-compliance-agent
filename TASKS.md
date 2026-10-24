@@ -43,7 +43,7 @@ Rule: all parts talk to each other through `docs/scan_result.schema.json`. In th
 - [ ] **Change Streams / Stream Processing:** push live scan progress to the frontend
 - [ ] `GET /scans`, `GET /scans/{id}`, `GET /search`; cache: skip the re-scan if the URL was scanned < 1h ago
 
-## Dwan: frontend (`frontend/`)
+## Dawan: frontend (`frontend/`)
 - [ ] URL input -> live progress (agent steps streaming in) -> report page
 - [ ] Scores per category, findings by severity, fix text + regulation quote
 - [ ] Scan history + search page (Bogdan's endpoints)

@@ -36,7 +36,7 @@ export default function Home() {
       result = await postScan(target);
     } catch {
       // Backend not running yet — fall back to the example report so the
-      // frontend can be built and demoed on its own (README section "Dwan").
+      // frontend can be built and demoed on its own (README section "Dawan").
       usingMock = true;
       result = { ...mockResult, url: target, scanned_at: new Date().toISOString() };
     }

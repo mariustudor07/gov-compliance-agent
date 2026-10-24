@@ -41,7 +41,7 @@ writes a report: what's wrong, how bad it is, which regulation it breaks, and ho
 ```
  ┌──────────────┐  POST /scan {url}   ┌──────────────────────────────────────────────────────┐
  │   Frontend   │ ──────────────────► │  API  (backend/api/main.py, FastAPI)                 │
- │   (Dwan)     │ ◄────────────────── │                                                      │
+ │   (Dawan)    │ ◄────────────────── │                                                      │
  └──────────────┘   ScanResult JSON   │  1. db: scanned this URL in the last hour? → return  │
                                       │  2. agent.analyse(url):                              │
                                       │       a. scanner.run_scan(url)        ← Rolef        │
@@ -141,7 +141,7 @@ If you need something changed in someone else's file, tell them.
 | 5 | `missing_clauses(text)` returns which required clauses are missing | `ml/classify.py` | try it on a gov.uk privacy page → few missing |
 | 6 | Gemini explains each finding + quotes the law via `search_regulations` | `agent/agent.py`, `agent/prompts.py` | findings have `fix` and `regulation` filled in |
 | 7 | Tune scoring so a gov.uk page scores high, a random site scores lower | `agent/scoring.py` | numbers feel fair |
-| 8 | Wire the API, turn off mock mode | `api/main.py` | Dwan's frontend shows a real scan |
+| 8 | Wire the API, turn off mock mode | `api/main.py` | Dawan's frontend shows a real scan |
 | 9 | *Stretch:* fine-tune DistilBERT and compare with the baseline | `ml/` | better numbers in `docs/model_results.md` |
 
 The 9 labels the classifier uses: `controller` (who runs the site), `purpose` (why data is collected),
@@ -164,7 +164,7 @@ The 9 labels the classifier uses: `controller` (who runs the site), `purpose` (w
 Rule for every finding: **always include `evidence`** (what exactly you saw: cookie names, header
 values, element counts). Evidence is what makes this look like a forensics tool and not a guess.
 
-### 🎨 Dwan: frontend: `frontend/`
+### 🎨 Dawan: frontend: `frontend/`
 **Your job: make it usable and make the demo look great. Judges see this first.**
 
 | # | Task | Done when |
@@ -230,7 +230,7 @@ The backend also has a mock mode (`MOCK_SCAN=1` in `.env`) that returns that fil
 | Bogdan | `db.repository.save_scan(result)` | the new scan's id (string) |
 | Bogdan | `db.repository.get_scan(id)` / `list_scans()` / `find_recent_scan(url)` | scan dict(s) or `None` |
 
-### HTTP API (for Dwan). Runs at `http://127.0.0.1:8000`; interactive docs at `/docs`
+### HTTP API (for Dawan). Runs at `http://127.0.0.1:8000`; interactive docs at `/docs`
 | Method | Path | Body | Returns |
 |---|---|---|---|
 | `POST` | `/scan` | `{"url": "https://..."}` | `ScanResult` |
