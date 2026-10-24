@@ -101,3 +101,10 @@ Run `python -m db.search_indexes` (admin, from `backend/`). It recreates any mis
 ones alone: **`rules_vector`** (Vector Search on `Compliance_Rules.Embedding`, 1024 dims, cosine) and
 **`findings_text`** (Atlas Search on `Findings`: Explanation, Reccomendation, Evidence.title/text as text;
 Rule_ID, Severity as tokens). 24 Oct ~22:30: `rules_vector` had been deleted; recreated, and `findings_text` added.
+
+## Restricted app user: verified (24 Oct, ~22:50)
+The app now connects as **`govcheck_app`** (Bogdan's custom role); scripts run as the admin user. Every
+read/write/modify/delete was attempted directly against Atlas (bypassing our code) without changing data:
+the role matches the permission table exactly (Atlas answers "user is not allowed to do action [...]"
+otherwise), and Training_Labels is fully off-limits. A full scan (Gemini + Vector Search) saves fine under it.
+So the permissions are enforced twice: in `AgentStore` and by Atlas itself.
