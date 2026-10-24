@@ -1,16 +1,9 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { postScan } from "../lib/api";
 import LoadingSteps from "../components/LoadingSteps";
 import HowItWorks from "../components/HowItWorks";
 import mockResult from "../mock/example_scan.json";
-
-const REG_BADGES = [
-  { label: "UK GDPR", anchor: "gdpr" },
-  { label: "PECR", anchor: "pecr" },
-  { label: "WCAG 2.2 AA", anchor: "wcag" },
-  { label: "NCSC guidance", anchor: "ncsc" },
-];
 
 function normaliseUrl(input) {
   const trimmed = input.trim();
@@ -79,16 +72,6 @@ export default function Home() {
         </form>
 
         {error && <p className="error">{error}</p>}
-
-        {!loading && (
-          <ul className="reg-strip">
-            {REG_BADGES.map((reg) => (
-              <li key={reg.label}>
-                <Link to={`/docs#${reg.anchor}`}>{reg.label}</Link>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       {loading && <LoadingSteps />}

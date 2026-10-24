@@ -17,6 +17,10 @@ export default function Footer() {
           </a>
         </nav>
       </div>
+      <p className="footer__checks">
+        Checked against <Link to="/docs#gdpr">UK GDPR</Link>, <Link to="/docs#pecr">PECR</Link>,{" "}
+        <Link to="/docs#wcag">WCAG 2.2 AA</Link> and <Link to="/docs#ncsc">NCSC guidance</Link>.
+      </p>
       <p className="footer__disclaimer">
         Not legal advice: an automated first pass, built for Encode London 2026. Verify anything
         important with a qualified professional.

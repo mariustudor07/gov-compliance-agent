@@ -160,9 +160,37 @@ h3 {
 
 /* ---------- home / hero ---------- */
 
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .home__hero {
+  position: relative;
   text-align: center;
   padding: 52px 0 20px;
+}
+
+/* A soft, static glow behind the hero text — contained to this section,
+   never animated. Adds a little atmosphere without the "floating blob
+   background" look. */
+.home__hero::before {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  width: 640px;
+  height: 320px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(79, 70, 229, 0.08), transparent 70%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .eyebrow {
@@ -171,11 +199,13 @@ h3 {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-faint);
-  border: 1px solid var(--border);
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 8%, white);
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, white);
   border-radius: 999px;
   padding: 4px 12px;
   margin-bottom: 18px;
+  animation: rise 0.5s ease both;
 }
 
 .home h1 {
@@ -183,6 +213,7 @@ h3 {
   line-height: 1.2;
   margin: 0 0 14px;
   font-weight: 600;
+  animation: rise 0.5s ease both 0.08s;
 }
 
 .gradient-text {
@@ -194,6 +225,7 @@ h3 {
   max-width: 560px;
   margin: 0 auto 32px;
   font-size: 1.02rem;
+  animation: rise 0.5s ease both 0.16s;
 }
 
 .scan-form {
@@ -201,6 +233,7 @@ h3 {
   gap: 8px;
   max-width: 540px;
   margin: 0 auto;
+  animation: rise 0.5s ease both 0.24s;
 }
 
 .scan-form input {
@@ -238,6 +271,7 @@ h3 {
 
 .scan-form button:hover:not(:disabled) {
   background: var(--brand-dark);
+  box-shadow: var(--shadow);
 }
 
 .scan-form button:disabled {
@@ -248,33 +282,6 @@ h3 {
 .error {
   color: var(--bad);
   margin-top: 12px;
-}
-
-.reg-strip {
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 0;
-  margin: 24px 0 0;
-}
-
-.reg-strip li a {
-  display: inline-block;
-  font-size: 0.74rem;
-  color: var(--text-faint);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: 999px;
-  padding: 4px 12px;
-  text-decoration: none;
-  transition: border-color 0.15s, color 0.15s;
-}
-
-.reg-strip li a:hover {
-  border-color: var(--brand-soft);
-  color: var(--brand);
 }
 
 /* ---------- how it works ---------- */
@@ -309,11 +316,13 @@ h3 {
   border-radius: var(--radius);
   padding: 18px 16px;
   position: relative;
-  transition: border-color 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .how__step:hover {
   border-color: color-mix(in srgb, var(--step-color) 40%, var(--border));
+  box-shadow: var(--shadow);
 }
 
 .how__connector {
@@ -606,11 +615,13 @@ h3 {
   padding: 11px 14px;
   text-decoration: none;
   color: var(--text);
-  transition: border-color 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .priority-timeline__card:hover {
   border-color: color-mix(in srgb, var(--cat-color, var(--brand)) 45%, var(--border));
+  box-shadow: var(--shadow);
 }
 
 .priority-timeline__top {
@@ -660,11 +671,13 @@ h3 {
   border-radius: var(--radius);
   padding: 16px 12px;
   text-align: center;
-  transition: border-color 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .score-tile:hover {
   border-color: color-mix(in srgb, var(--cat-color, var(--brand)) 35%, var(--border));
+  box-shadow: var(--shadow);
 }
 
 .score-tile__label {
@@ -791,6 +804,7 @@ h3 {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   padding: 18px 22px;
 }
 
@@ -889,12 +903,14 @@ h3 {
   border-left: 3px solid var(--cat-color, var(--border));
   border-radius: var(--radius);
   padding: 16px;
-  transition: border-color 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .finding:hover {
   border-color: color-mix(in srgb, var(--cat-color, var(--border)) 45%, var(--border));
   border-left-color: var(--cat-color, var(--border));
+  box-shadow: var(--shadow);
 }
 
 .finding__head {
@@ -1026,11 +1042,13 @@ h3 {
   padding: 14px 16px;
   text-decoration: none;
   color: var(--text);
-  transition: border-color 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .history-list__item a:hover {
   border-color: var(--brand-soft);
+  box-shadow: var(--shadow);
 }
 
 .history-list__url {
@@ -1097,9 +1115,30 @@ h3 {
   color: var(--brand);
 }
 
-.footer__disclaimer {
+.footer__checks {
   max-width: var(--max-width);
   margin: 16px auto 0;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.footer__checks a {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+
+.footer__checks a:hover {
+  color: var(--brand);
+  text-decoration-color: var(--brand-soft);
+}
+
+.footer__disclaimer {
+  max-width: var(--max-width);
+  margin: 6px auto 0;
   font-size: 0.74rem;
   color: var(--text-faint);
   text-align: center;
@@ -1134,6 +1173,7 @@ h3 {
   border: 1px solid var(--border);
   border-left: 3px solid var(--cat-color, var(--border));
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   padding: 20px 22px;
   margin: 18px 0;
   scroll-margin-top: 90px;
