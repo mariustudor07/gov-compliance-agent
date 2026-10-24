@@ -1,7 +1,9 @@
-"""ADMIN script, run by a person, never by the app: fills Legal_Sources and Compliance_Rules.
+"""ADMIN script, run by a person, never by the app: fills Legal_Sources, Compliance_Rules (with the
+real legal text from legislation.gov.uk) and Training_Labels (our labelled sentences).
 
 Bogdan's design says the AI may read the law but never write it, so the law gets into the database
 by hand. Safe to run again: each record is replaced by its ID, nothing is duplicated or deleted.
+Re-run it after the label review to update Training_Labels.
 
     cd backend
     python -m db.seed
@@ -22,7 +24,7 @@ def _d(y, m, d):
     return datetime(y, m, d, tzinfo=timezone.utc)
 
 
-# Published_At is the date the law came into force / was published. For the two guidance pages we
+# Published_At: Royal Assent for Acts, "made" date for regulations (checked on legislation.gov.uk). For the two guidance pages we
 # don't know the original date, so Status is "under review" and Published_At is our review date.
 LEGAL_SOURCES = [
     {"Src_ID": "UKGDPR", "Src_Title": "UK General Data Protection Regulation", "Src_Type": "legislation",
@@ -36,12 +38,22 @@ LEGAL_SOURCES = [
     {"Src_ID": "PECR", "Src_Title": "Privacy and Electronic Communications (EC Directive) Regulations 2003",
      "Src_Type": "legislation", "Juristiction": "UK", "Src_Publisher": "UK Parliament",
      "Src_URL": "https://www.legislation.gov.uk/uksi/2003/2426/contents", "Src_Version": "SI 2003/2426, as amended",
-     "Status": "active", "Published_At": _d(2003, 12, 11), "Reviewed_At": TODAY},
+     "Status": "active", "Published_At": _d(2003, 9, 18), "Reviewed_At": TODAY},
     {"Src_ID": "PSBAR2018",
      "Src_Title": "Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018",
      "Src_Type": "legislation", "Juristiction": "UK", "Src_Publisher": "UK Parliament",
      "Src_URL": "https://www.legislation.gov.uk/uksi/2018/952/contents", "Src_Version": "SI 2018/952",
-     "Status": "active", "Published_At": _d(2018, 9, 23), "Reviewed_At": TODAY},
+     "Status": "active", "Published_At": _d(2018, 8, 29), "Reviewed_At": TODAY},
+    {"Src_ID": "DUAA2025", "Src_Title": "Data (Use and Access) Act 2025", "Src_Type": "legislation",
+     "Juristiction": "UK", "Src_Publisher": "UK Parliament",
+     "Src_URL": "https://www.legislation.gov.uk/ukpga/2025/18/contents",
+     "Src_Version": "2025 c. 18 (amends UK GDPR, DPA 2018 and PECR, e.g. PECR Schedule A1)",
+     "Status": "active", "Published_At": _d(2025, 6, 19), "Reviewed_At": TODAY},
+    {"Src_ID": "EQA2010", "Src_Title": "Equality Act 2010", "Src_Type": "legislation",
+     "Juristiction": "UK", "Src_Publisher": "UK Parliament",
+     "Src_URL": "https://www.legislation.gov.uk/ukpga/2010/15/contents",
+     "Src_Version": "2010 c. 15 (s.20 duty to make adjustments: applies to private service providers too)",
+     "Status": "active", "Published_At": _d(2010, 4, 8), "Reviewed_At": TODAY},
     {"Src_ID": "WCAG22", "Src_Title": "Web Content Accessibility Guidelines (WCAG) 2.2", "Src_Type": "standard",
      "Juristiction": "International (the AA level is required by PSBAR2018)", "Src_Publisher": "W3C",
      "Src_URL": "https://www.w3.org/TR/WCAG22/", "Src_Version": "2.2 W3C Recommendation",
@@ -92,7 +104,7 @@ COMPLIANCE_RULES = [
           "browser+gemini_vision", "High", "A consent banner with a reject option as prominent as accept."),
     _rule("COOK-POLICY", "A cookie policy is published", "cookies", "PECR", "reg. 6(2)", "browser", "Medium",
           "Clear and comprehensive information about every cookie used."),
-    _rule("A11Y-WCAG", "Pages meet WCAG 2.2 AA", "other", "PSBAR2018", "reg. 3, WCAG 2.2 AA", "axe-core",
+    _rule("A11Y-WCAG", "Pages meet WCAG 2.2 AA", "other", "PSBAR2018", "reg. 6, WCAG 2.2 AA", "axe-core",
           "High", "Automated WCAG 2.2 A/AA checks on every crawled page."),
     _rule("A11Y-STATEMENT", "An accessibility statement is published", "other", "PSBAR2018", "reg. 8", "browser",
           "High", "Public sector websites must publish an accessibility statement saying how compliant they are."),
@@ -108,14 +120,93 @@ COMPLIANCE_RULES = [
 ]
 
 
+# The exact legal provisions each rule enforces. Their current text is fetched from legislation.gov.uk
+# and stored on the rule (Legal_Text), so Gemini can quote the real law and Vector Search has text to embed.
+GDPR = "https://www.legislation.gov.uk/eur/2016/679/article/"
+PECR6 = ["https://www.legislation.gov.uk/uksi/2003/2426/regulation/6",
+         "https://www.legislation.gov.uk/uksi/2003/2426/schedule/A1"]
+PROVISIONS = {
+    "PRIV-NOTICE": [GDPR + "12", GDPR + "13"],
+    "PRIV-CONTROLLER": [GDPR + "13"], "PRIV-PURPOSE": [GDPR + "13"],
+    "PRIV-LAWFUL": [GDPR + "6", GDPR + "13"], "PRIV-RIGHTS": [GDPR + "13"],
+    "PRIV-RETENTION": [GDPR + "13"], "PRIV-CONTACT": [GDPR + "13"],
+    "PRIV-THIRDPARTIES": [GDPR + "13"], "PRIV-ICO": [GDPR + "13"],
+    "COOK-PRECONSENT": PECR6, "COOK-BANNER": PECR6, "COOK-POLICY": PECR6,
+    "A11Y-WCAG": ["https://www.legislation.gov.uk/uksi/2018/952/regulation/6",
+                  "https://www.legislation.gov.uk/uksi/2018/952/regulation/3"],
+    "A11Y-STATEMENT": ["https://www.legislation.gov.uk/uksi/2018/952/regulation/8"],
+    # NCSC guidance isn't law; the legal hook for basic web security is UK GDPR Article 32.
+    "SEC-TLS": [GDPR + "32"], "SEC-HSTS": [GDPR + "32"], "SEC-HEADERS": [GDPR + "32"], "SEC-MIXED": [GDPR + "32"],
+}
+MAX_LEGAL_TEXT = 12000  # characters stored per rule
+
+
+def fetch_provision(url, cache={}):
+    import re
+
+    import httpx
+    from bs4 import BeautifulSoup
+    if url not in cache:
+        r = httpx.get(url, follow_redirects=True, timeout=30, headers={"User-Agent": "GovCheck-research/0.1"})
+        r.raise_for_status()
+        body = BeautifulSoup(r.text, "html.parser").select_one("#viewLegContents")
+        cache[url] = re.sub(r"\s+", " ", body.get_text(" ", strip=True)) if body else ""
+    return cache[url]
+
+
+def add_legal_text(rule):
+    urls = PROVISIONS.get(rule["Rule_ID"], [])
+    texts = [fetch_provision(u) for u in urls]
+    rule["Legal_Text"] = "\n\n".join(t for t in texts if t)[:MAX_LEGAL_TEXT]
+    rule["Legal_Text_URLs"] = urls
+    rule["Legal_Text_Fetched_At"] = datetime.now(timezone.utc)
+    return rule
+
+
+# --- Training_Labels: our labelled sentences (data/labels.csv). Not in the AI agent's permission table,
+# so the agent can't touch it; it's for people training the model.
+LABELS = ["controller", "purpose", "lawful_basis", "rights", "retention", "contact_dpo", "third_parties",
+          "complaints_ico", "data_collected", "cookies", "security", "automated_decisions", "other"]
+TRAINING_VALIDATOR = {"$jsonSchema": {
+    "title": "Training_Labels", "bsonType": "object",
+    "required": ["Label_ID", "Sentence", "Label", "Human_Checked", "Source_URL", "Imported_At"],
+    "properties": {
+        "Label_ID": {"bsonType": "string"}, "Sentence": {"bsonType": "string"},
+        "Label": {"enum": LABELS}, "Second_Opinion": {"bsonType": "string"},
+        "Human_Checked": {"bsonType": "bool"}, "Needs_Review": {"bsonType": "bool"},
+        "Also": {"bsonType": "string"}, "Source_URL": {"bsonType": "string"}, "Imported_At": {"bsonType": "date"}}}}
+
+
+def import_labels(db):
+    import csv
+    import hashlib
+    if "Training_Labels" not in db.list_collection_names():
+        db.create_collection("Training_Labels", validator=TRAINING_VALIDATOR)
+        db.Training_Labels.create_index("Label_ID", unique=True)
+        db.Training_Labels.create_index("Label")
+    path = Path(__file__).resolve().parents[2] / "data" / "labels.csv"
+    now = datetime.now(timezone.utc)
+    with path.open(encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            label_id = hashlib.sha1((row["source"] + "|" + row["sentence"]).encode()).hexdigest()[:16]
+            db.Training_Labels.replace_one({"Label_ID": label_id}, {
+                "Label_ID": label_id, "Sentence": row["sentence"], "Label": row["label"],
+                "Second_Opinion": row.get("second_opinion", ""), "Human_Checked": row.get("human_checked") == "True",
+                "Needs_Review": row.get("needs_review") == "True", "Also": row.get("also", ""),
+                "Source_URL": row["source"], "Imported_At": now}, upsert=True)
+
+
 def main():
     db = MongoClient(os.environ["MONGODB_URI"])[os.getenv("MONGODB_DB", "Audit_AI_Db")]
     for src in LEGAL_SOURCES:
         db.Legal_Sources.replace_one({"Src_ID": src["Src_ID"]}, src, upsert=True)
     for rule in COMPLIANCE_RULES:
-        db.Compliance_Rules.replace_one({"Rule_ID": rule["Rule_ID"]}, rule, upsert=True)
+        db.Compliance_Rules.replace_one({"Rule_ID": rule["Rule_ID"]}, add_legal_text(dict(rule)), upsert=True)
+    import_labels(db)
+    with_text = db.Compliance_Rules.count_documents({"Legal_Text": {"$ne": ""}})
     print(f"Legal_Sources: {db.Legal_Sources.count_documents({})} | "
-          f"Compliance_Rules: {db.Compliance_Rules.count_documents({})}")
+          f"Compliance_Rules: {db.Compliance_Rules.count_documents({})} ({with_text} with legal text) | "
+          f"Training_Labels: {db.Training_Labels.count_documents({})}")
 
 
 if __name__ == "__main__":

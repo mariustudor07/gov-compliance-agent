@@ -16,6 +16,8 @@ Reads made by the website's History pages (list_scans / get_scan) are not the AI
 aren't logged.
 """
 import itertools
+import json
+import os
 import time
 import uuid
 from datetime import datetime, timezone
@@ -82,17 +84,26 @@ def rule_for(finding_id):
     return None
 
 
+def _agent_description():
+    gemini_on = os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_MODEL")
+    return "GovCheck agent: crawler + our clause classifier" + (f" + {os.environ['GEMINI_MODEL']}" if gemini_on else "")
+
+
 class AgentStore:
     def __init__(self, db=None):
         self.db = db if db is not None else get_db()
+        self.context = {}  # scan_id / website for the events of the scan being saved
 
     # --- permission-checked, audited operations ------------------------------------------------
     def _check(self, collection, op):
         if op not in PERMISSIONS.get(collection, ""):
             raise PermissionError(f"The AI agent may not {OPERATION[op]} {collection} (Bogdan's permission table)")
 
-    def _event(self, event_type, collection, entity_id, details):
+    def _event(self, event_type, collection, entity_id, what, reason, **extra):
+        """'Set details of what the agent did' (Bogdan's note): a plain description, why, and context."""
         self._check("Audit_Events", "W")
+        details = {"what": what, "reason": reason, "collection": collection, "agent": _agent_description(),
+                   **self.context, **extra}
         self.db.Audit_Events.insert_one({
             "Event_ID": str(uuid.uuid4()), "Event_Type": event_type, "Entity_Type": ENTITY_TYPE[collection],
             "Entity_ID": str(entity_id), "Actor": ACTOR, "Timestamp": _now_ts(), "details": details})
@@ -101,18 +112,25 @@ class AgentStore:
         self._check(collection, "R")
         docs = list(self.db[collection].find(query, {"_id": 0}))
         for doc in docs:
-            self._event("accessed", collection, doc[ID_FIELD[collection]], {"why": why})
+            self._event("accessed", collection, doc[ID_FIELD[collection]],
+                        f"read {ENTITY_TYPE[collection]} {doc[ID_FIELD[collection]]}", why,
+                        query=json.dumps(query, default=str))  # as text: stored keys can't start with "$"
         return docs
 
     def insert(self, collection, doc, why):
         self._check(collection, "W")
         self.db[collection].insert_one(dict(doc))
-        self._event("created", collection, doc[ID_FIELD[collection]], {"why": why})
+        self._event("created", collection, doc[ID_FIELD[collection]],
+                    f"created {ENTITY_TYPE[collection]} {doc[ID_FIELD[collection]]}", why, fields_set=sorted(doc))
 
     def update(self, collection, entity_id, changes, why):
         self._check(collection, "M")
+        before = self.db[collection].find_one({ID_FIELD[collection]: entity_id}, {"_id": 0, **{k: 1 for k in changes}})
+        if before is not None and all(before.get(k) == v for k, v in changes.items()):
+            return  # nothing would change: no write, so no event
         self.db[collection].update_one({ID_FIELD[collection]: entity_id}, {"$set": changes})
-        self._event("update", collection, entity_id, {"why": why, "changes": list(changes)})
+        self._event("update", collection, entity_id, f"updated {ENTITY_TYPE[collection]} {entity_id}", why,
+                    changes={k: {"from": str((before or {}).get(k)), "to": str(v)} for k, v in changes.items()})
 
     def delete(self, collection, entity_id):
         self._check(collection, "D")  # nothing allows D, so this always refuses
@@ -121,6 +139,8 @@ class AgentStore:
     def save_scan(self, result):
         """Stores one GovCheck result following Bogdan's workflow. Returns the Scan_ID."""
         url = result["url"]
+        scan_id = str(uuid.uuid4())
+        self.context = {"scan_id": scan_id, "website": url}
 
         # 1. project
         projects = self.find("Projects", {"Repository_URL": url}, "look up the project for this website")
@@ -144,7 +164,6 @@ class AgentStore:
         rule_ids = {r["Rule_ID"] for r in rules}
 
         # 3. scan
-        scan_id = str(uuid.uuid4())
         kept = [f for f in result["findings"] if rule_for(f["id"]) in rule_ids]
         self.insert("Code_Scans", {
             "Scan_ID": scan_id, "Project_ID": project["Project_ID"],
