@@ -617,7 +617,13 @@ h3 {
 .priority__heading {
   font-size: 1rem;
   font-weight: 700;
-  margin: 0 0 12px;
+  margin: 0 0 4px;
+}
+
+.priority__intro {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  margin: 0 0 16px;
 }
 
 .priority-timeline {
@@ -675,6 +681,21 @@ h3 {
   background: var(--medium);
 }
 
+.priority-timeline__item--low .priority-timeline__node {
+  background: var(--low);
+}
+
+.gain-pill {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--good);
+  background: var(--good-bg);
+  white-space: nowrap;
+}
+
 .priority-timeline__card {
   flex: 1 1 auto;
   min-width: 0;
@@ -714,17 +735,33 @@ h3 {
   margin: 0 0 4px;
   font-weight: 600;
   font-size: 0.92rem;
+  line-height: 1.45;
 }
 
 .priority-timeline__fix {
   margin: 0;
-  font-size: 0.82rem;
-  color: var(--text-dim);
+  font-size: 0.8rem;
+  color: var(--text-faint);
   line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+}
+
+.priority-timeline__fix a {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+}
+
+.priority-timeline__fix a:hover {
+  color: var(--brand);
+}
+
+@media (max-width: 480px) {
+  .priority-timeline__top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
 }
 
 .scores {

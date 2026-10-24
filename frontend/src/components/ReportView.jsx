@@ -1,7 +1,7 @@
 import ScoreTile from "./ScoreTile";
 import FindingCard from "./FindingCard";
 import SeverityDonut from "./SeverityDonut";
-import PriorityFixes from "./PriorityFixes";
+import ImprovementPlan from "./ImprovementPlan";
 import Reveal from "./Reveal";
 import DownloadPdfButton from "./DownloadPdfButton";
 import { ReportIcon, AccessibilityIcon, CookieIcon, EyeIcon, ShieldIcon, SparkleIcon } from "./icons";
@@ -79,7 +79,7 @@ export default function ReportView({ result, usingMock = false }) {
         <SeverityDonut counts={counts} />
       </Reveal>
 
-      <PriorityFixes findings={findings} />
+      <ImprovementPlan findings={findings} scores={scores} />
 
       {grouped.map((group, groupIndex) => (
         <section key={group.severity} className="finding-group">

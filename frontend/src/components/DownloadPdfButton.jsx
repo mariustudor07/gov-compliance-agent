@@ -25,7 +25,7 @@ export default function DownloadPdfButton({ result, usingMock }) {
           <path d="M7 10l5 5 5-5" />
           <path d="M5 20h14" />
         </svg>
-        {busy ? "Preparing PDF…" : "Download PDF"}
+        {busy ? "Preparing PDF…" : "Download PDF Report"}
       </button>
       {failed && <p className="pdf-action__error">Couldn't create the PDF. Please try again.</p>}
     </div>
