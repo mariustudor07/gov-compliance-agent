@@ -125,5 +125,10 @@ So the permissions are enforced twice: in `AgentStore` and by Atlas itself.
 | Top box **IND → AI**: an individual calls the AI | the person scanning on the website; events record `requested_by: "an individual via the website"` (anonymous on purpose: no IP addresses) | ✅ |
 | Bottom box **export → Usr**: the result goes back to the user | the report returned to the website, plus Dawan's PDF download | ✅ |
 
-**Still open (questions for Bogdan):** what "Create a Source ID if the source is new" means (we set `Src_ID = UKGDPR`);
-what `Project_Status = "processed"` should mean (unused).
+**Decided for Bogdan (our reading of the diagram; easy to change in `db/agent_store.py` if he meant otherwise):**
+- *"Create a Source ID if the source is new"*: `Projects.Src_ID` links the project to the main law of its
+  jurisdiction (UK → `UKGDPR`, `GOVERNING_SOURCE`). Because the AI may not create legal sources (his permission table),
+  it **looks the source up** (logged as an accessed event) and, if it isn't in Legal_Sources, sets `PENDING-REVIEW`
+  for a person to add it. It never invents one.
+- *`Project_Status`*: **unscanned** (project created) → **scanned** (scan + findings saved) → **processed** (report
+  returned to the individual: the "export → Usr" step). Each change is an update event with from → to.

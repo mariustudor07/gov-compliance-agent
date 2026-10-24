@@ -48,6 +48,15 @@ ID_FIELD = {"Projects": "Project_ID", "Code_Scans": "Scan_ID", "Findings": "Find
 SCOPE_RULES = {"privacy": "PRIV-", "cookies": "COOK-", "accessibility": "A11Y-", "security": "SEC-"}
 DEFAULT_SCOPE = list(SCOPE_RULES)
 
+# Projects.Src_ID: the main law of the project's jurisdiction (see _governing_source).
+GOVERNING_SOURCE = {"UK": "UKGDPR"}
+PENDING_SOURCE = "PENDING-REVIEW"
+
+# Project_Status lifecycle (our reading of Bogdan's diagram, which ends "export -> user"):
+#   unscanned  project created (step 1)
+#   scanned    scan + findings saved (steps 3-5)
+#   processed  report returned to the individual who asked (export -> user)
+
 CLAUSE_RULE = {"controller": "PRIV-CONTROLLER", "purpose": "PRIV-PURPOSE", "lawful_basis": "PRIV-LAWFUL",
                "rights": "PRIV-RIGHTS", "retention": "PRIV-RETENTION", "contact_dpo": "PRIV-CONTACT",
                "third_parties": "PRIV-THIRDPARTIES", "complaints_ico": "PRIV-ICO"}
@@ -167,6 +176,15 @@ class AgentStore:
         self._check(collection, "D")  # nothing allows D, so this always refuses
 
     # --- the workflow ---------------------------------------------------------------------------
+    def _governing_source(self, jurisdiction):
+        """Bogdan's "create a Source ID if the source is new", read with his permission table: the AI may not
+        create legal sources, so a new project is linked to the jurisdiction's main law if it's in
+        Legal_Sources, and to PENDING-REVIEW (for a person to add the source) if it isn't."""
+        wanted = GOVERNING_SOURCE.get(jurisdiction)
+        found = self.find("Legal_Sources", {"Src_ID": wanted, "Status": "active"},
+                          f"governing legal source for a new {jurisdiction} project") if wanted else []
+        return found[0]["Src_ID"] if found else PENDING_SOURCE
+
     def save_scan(self, result):
         """Both halves at once, for a result scanned without begin() (e.g. scripts). Returns the Scan_ID."""
         self.begin(result["url"])
@@ -184,9 +202,10 @@ class AgentStore:
         if projects:
             project = projects[0]
         else:
+            jurisdiction = "UK"
             project = {"Project_ID": str(uuid.uuid4()), "Project_Title": urlparse(url).netloc or url,
-                       "Repository_URL": url, "Environnement": "production", "Juristiction": "UK",
-                       "Src_ID": "UKGDPR", "Compliance_Scope": DEFAULT_SCOPE,
+                       "Repository_URL": url, "Environnement": "production", "Juristiction": jurisdiction,
+                       "Src_ID": self._governing_source(jurisdiction), "Compliance_Scope": DEFAULT_SCOPE,
                        "Project_Created": datetime.now(timezone.utc), "Project_Status": "unscanned"}
             self.insert("Projects", project, "new website scanned for the first time")
 
@@ -234,6 +253,11 @@ class AgentStore:
         # 5. project scanned
         self.update("Projects", project["Project_ID"], {"Project_Status": "scanned"}, f"scan {scan_id} saved")
         return scan_id
+
+    def mark_processed(self):
+        """Last step of Bogdan's diagram (export -> user): the report has been handed back to the individual."""
+        self.update("Projects", self.project["Project_ID"], {"Project_Status": "processed"},
+                    f"report for scan {self.scan_id} returned to the individual (export -> user)")
 
 
 # --- reads for the website (History / report pages): not the AI agent, so not audited -------------

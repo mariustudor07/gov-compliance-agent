@@ -77,3 +77,17 @@ def test_every_finding_type_maps_to_a_rule():
                 "a11y-statement", "a11y-color-contrast-0", "sec-https", "sec-certificate",
                 "sec-strict-transport-security", "sec-mixed-content", "sec-clickjacking"]:
         assert rule_for(fid), fid
+
+
+# --- Bogdan's "create a Source ID if the source is new" (our reading: link, never create) -------------
+def test_unknown_jurisdiction_source_is_pending_not_invented():
+    store = AgentStore(db=NoDatabase())
+    store.find = lambda collection, query, why: []  # the law isn't in Legal_Sources
+    assert store._governing_source("UK") == "PENDING-REVIEW"
+    assert store._governing_source("Narnia") == "PENDING-REVIEW"
+
+
+def test_known_jurisdiction_links_its_main_law():
+    store = AgentStore(db=NoDatabase())
+    store.find = lambda collection, query, why: [{"Src_ID": query["Src_ID"]}]
+    assert store._governing_source("UK") == "UKGDPR"

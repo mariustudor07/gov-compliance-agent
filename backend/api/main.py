@@ -46,6 +46,7 @@ def scan(req: ScanRequest):
     if store:
         try:
             result["id"] = store.finish(result)
+            store.mark_processed()  # the report is returned to the individual below (export -> user)
         except Exception as e:
             print(f"Could not save scan to MongoDB: {e}")
     return result
