@@ -35,7 +35,7 @@ export default function ReportView({ result, usingMock = false }) {
     <div className="report">
       {usingMock && (
         <div className="banner">
-          Showing example data — the backend isn't connected yet (set
+          Showing example data: the backend isn't connected yet (set
           <code> VITE_API_BASE</code> or run the API).
         </div>
       )}

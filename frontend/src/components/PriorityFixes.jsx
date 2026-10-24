@@ -1,10 +1,10 @@
 import Reveal from "./Reveal";
 import { SEVERITY_ORDER, SEVERITY_LABEL, CATEGORY_LABEL, CATEGORY_COLOR } from "../lib/format";
 
-// What counts as "fix this first" — pass/low don't need urgent action.
+// What counts as "fix this first". Pass/low don't need urgent action.
 const URGENT = ["critical", "high", "medium"];
 
-/** A visual timeline of the most urgent findings, most severe first — built
+/** A visual timeline of the most urgent findings, most severe first, built
  * straight from the findings data (not scraped out of the AI's prose
  * summary), each step linking down to the full finding. */
 export default function PriorityFixes({ findings = [], max = 4 }) {

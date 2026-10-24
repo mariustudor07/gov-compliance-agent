@@ -1,4 +1,4 @@
-// Small inline icon set, stroke-based, 24x24, currentColor — keeps the bundle
+// Small inline icon set, stroke-based, 24x24, currentColor. Keeps the bundle
 // light with no icon library dependency.
 
 const base = {

@@ -1,9 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 import Nav from "./components/Nav";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Report from "./pages/Report";
 import ReportById from "./pages/ReportById";
 import History from "./pages/History";
+import Docs from "./pages/Docs";
 
 export default function App() {
   return (
@@ -15,8 +17,10 @@ export default function App() {
           <Route path="/report" element={<Report />} />
           <Route path="/report/:id" element={<ReportById />} />
           <Route path="/history" element={<History />} />
+          <Route path="/docs" element={<Docs />} />
         </Routes>
       </main>
+      <Footer />
     </>
   );
 }

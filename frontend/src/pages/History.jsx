@@ -11,7 +11,7 @@ export default function History() {
   useEffect(() => {
     getScans()
       .then(setScans)
-      .catch(() => setError("Couldn't load scan history — is the API running?"));
+      .catch(() => setError("Couldn't load scan history. Is the API running?"));
   }, []);
 
   if (error) return <p className="error">{error}</p>;
