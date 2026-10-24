@@ -95,3 +95,9 @@ at least one rule per finding type (privacy clauses, cookies, accessibility, sec
 `MONGODB_HOST`, `MONGODB_APP_USER`/`MONGODB_APP_PASSWORD` (restricted role, used by the app and the agent) and
 `MONGODB_ADMIN_USER`/`MONGODB_ADMIN_PASSWORD` (full access, only for `db.seed` / `db.embed_rules`). Passwords
 are URL-encoded by `db/client.py`. While the app user is empty, `MONGODB_URI` is used for everything.
+
+## Search indexes (if one gets deleted)
+Run `python -m db.search_indexes` (admin, from `backend/`). It recreates any missing index and leaves existing
+ones alone: **`rules_vector`** (Vector Search on `Compliance_Rules.Embedding`, 1024 dims, cosine) and
+**`findings_text`** (Atlas Search on `Findings`: Explanation, Reccomendation, Evidence.title/text as text;
+Rule_ID, Severity as tokens). 24 Oct ~22:30: `rules_vector` had been deleted; recreated, and `findings_text` added.
