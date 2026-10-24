@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from playwright.sync_api import sync_playwright
 
 from .accessibility import run_axe
+from .privacy_page import link_rank
 
 # Links whose URL or text contains one of these are worth visiting.
 KEYWORDS = ("privacy", "cookie", "accessibility", "data-protection")
@@ -44,7 +45,8 @@ def crawl(url, max_pages=5):
         pages.append(_snapshot(page, response))
 
         host = urlparse(page.url).netloc
-        wanted = _matching_links(page, host, KEYWORDS)
+        # Proper "privacy notice/policy" links first, cookie/news links last (stable: keeps page order otherwise).
+        wanted = sorted(_matching_links(page, host, KEYWORDS), key=link_rank)
         visited = {page.url}
 
         for href in wanted[: max_pages - 1]:
@@ -58,7 +60,7 @@ def crawl(url, max_pages=5):
             # Many sites link to a short privacy "hub" page that links on to the real policy.
             # Follow those links one level deeper so we read the actual notice.
             if "privacy" in page.url.lower() and len(pages[-1]["text"]) < SHORT_PAGE_CHARS:
-                deeper = [h for h in _matching_links(page, host, ("privacy",)) if h not in visited]
+                deeper = sorted((h for h in _matching_links(page, host, ("privacy",)) if h not in visited), key=link_rank)
                 for deep in deeper[:2]:
                     try:
                         response = _goto(page, deep)

@@ -31,6 +31,7 @@ from ml.train import new_model
 DATA = Path(__file__).resolve().parents[2] / "data"
 OUT = DATA / "doc_eval.csv"
 NEW_OUT = DATA / "doc_eval_new.csv"
+SITES_OUT = DATA / "doc_eval_sites.csv"
 FIELDS = ["policy", "clause", "model", "confidence", "evidence", "truth"]
 
 
@@ -119,6 +120,108 @@ def run_new():
     print(f"\nWrote {NEW_OUT}")
 
 
+def _find_policy(browser, homepage):
+    """Like the scanner: open the homepage, follow privacy links (one level deeper from short hub
+    pages), skip error pages, and return the longest privacy page found."""
+    from urllib.parse import urlparse
+
+    from scanner.crawler import SHORT_PAGE_CHARS, USER_AGENT, _goto, _matching_links
+    from scanner.privacy_page import best_notice, link_rank
+
+    context = browser.new_context(user_agent=USER_AGENT, locale="en-GB")
+    page = context.new_page()
+    try:
+        _goto(page, homepage)
+        host = urlparse(page.url).netloc
+        candidates = sorted(_matching_links(page, host, ("privacy", "data-protection")), key=link_rank)[:4]
+        found = []
+        for href in candidates:
+            try:
+                response = _goto(page, href)
+            except Exception:
+                continue
+            if response and response.status >= 400:
+                continue
+            text = page.inner_text("body")
+            found.append((page.url, text))
+            if len(text) < SHORT_PAGE_CHARS:  # privacy hub: follow one level deeper
+                deeper = sorted((h for h in _matching_links(page, host, ("privacy",)) if h not in candidates), key=link_rank)
+                for deep in deeper[:2]:
+                    try:
+                        response = _goto(page, deep)
+                        if not response or response.status < 400:
+                            found.append((page.url, page.inner_text("body")))
+                    except Exception:
+                        pass
+        if not found:
+            return {"policy_url": "", "text": "", "error": "no privacy link found"}
+        best = best_notice([{"url": u, "text": t} for u, t in found])
+        return {"policy_url": best["url"], "text": best["text"], "error": ""}
+    except Exception as e:
+        return {"policy_url": "", "text": "", "error": str(e).splitlines()[0][:120]}
+    finally:
+        context.close()
+
+
+def _crawl_chunk(homepages):
+    from playwright.sync_api import sync_playwright
+
+    results = {}
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        for homepage in homepages:
+            results[homepage] = _find_policy(browser, homepage)
+            r = results[homepage]
+            print(f"{len(r['text'].split()):6} words  {homepage}  {r['error']}", flush=True)
+        browser.close()
+    return results
+
+
+def run_sites(workers=6):
+    """Large-scale test: the app's own policy-finding + model on many UK homepages."""
+    import json
+    from concurrent.futures import ThreadPoolExecutor
+
+    from agent.agent import MIN_POLICY_WORDS
+    from ml.classify import classify_sentences
+
+    homepages = [u.strip() for u in (DATA / "test_sites.txt").read_text().splitlines()
+                 if u.strip() and not u.startswith("#")]
+    cache = DATA / "raw" / "site_texts.json"
+    cache.parent.mkdir(exist_ok=True)
+    texts = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
+    todo = [h for h in homepages if h not in texts]
+    chunks = [todo[i::workers] for i in range(workers)]
+    with ThreadPoolExecutor(workers) as pool:  # each thread runs its own browser
+        for result in pool.map(_crawl_chunk, chunks):
+            texts.update(result)
+    cache.write_text(json.dumps(texts), encoding="utf-8")
+
+    old_truth = {}
+    if SITES_OUT.exists():
+        old_truth = {(r["policy"], r["clause"]): r["truth"] for r in csv.DictReader(SITES_OUT.open(encoding="utf-8"))}
+    rows = []
+    for homepage in homepages:
+        site = texts[homepage]
+        words = len(site["text"].split())
+        results = classify_sentences(site["text"]) if words >= MIN_POLICY_WORDS else []
+        for clause in REQUIRED:
+            hits = [r for r in results if r["label"] == clause and r["confidence"] >= MIN_CONFIDENCE]
+            best = max(hits, key=lambda r: r["confidence"]) if hits else None
+            verdict = "unreadable" if words < MIN_POLICY_WORDS else "present" if hits else "missing"
+            rows.append({"policy": homepage, "clause": clause, "model": verdict,
+                         "confidence": f"{best['confidence']:.2f}" if best else "",
+                         "evidence": best["sentence"][:300] if best else "",
+                         "truth": old_truth.get((homepage, clause), ""), "words": words,
+                         "policy_url": site["policy_url"]})
+    with SITES_OUT.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDS + ["words", "policy_url"])
+        writer.writeheader()
+        writer.writerows(rows)
+    readable = {r["policy"] for r in rows if r["model"] != "unreadable"}
+    print(f"\n{len(readable)} of {len(homepages)} sites had a readable privacy notice. Wrote {SITES_OUT}")
+
+
 def score(path=OUT):
     rows = [r for r in csv.DictReader(path.open(encoding="utf-8")) if r["truth"] in ("present", "missing")]
     if not rows:
@@ -141,7 +244,9 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     if args == ["new"]:
         run_new()
+    elif args == ["sites"]:
+        run_sites()
     elif args[:1] == ["score"]:
-        score(NEW_OUT if args[1:] == ["new"] else OUT)
+        score({"new": NEW_OUT, "sites": SITES_OUT}.get(args[1] if args[1:] else "", OUT))
     else:
         run()
