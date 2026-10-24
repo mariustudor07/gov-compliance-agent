@@ -57,9 +57,7 @@ export default function HowItWorks() {
           ];
           if (i < STEPS.length - 1) {
             nodes.push(
-              <li className="how__connector" key={`connector-${title}`} aria-hidden="true">
-                <span className="how__connector-dot" />
-              </li>
+              <li className="how__connector" key={`connector-${title}`} aria-hidden="true" />
             );
           }
           return nodes;
