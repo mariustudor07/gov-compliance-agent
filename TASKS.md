@@ -1,7 +1,7 @@
 # Tasks: Fri 23 -> Sun 25 Oct
 
 Tracks we're entering with one project:
-**Agents That Ship** (main), **Google DeepMind / Gemini 4 Argon**, **MongoDB Atlas**, **Saint**.
+**Agents That Ship** (main), **Google DeepMind / Gemini 4 Argon**, **MongoDB Atlas**.
 Read each track's full brief and judging criteria. Each track needs its own submission.
 
 Rule: all parts talk to each other through `docs/scan_result.schema.json`. In the first hour, agree on it, then split up.
@@ -24,15 +24,11 @@ Rule: all parts talk to each other through `docs/scan_result.schema.json`. In th
 - [ ] Score function (0-100 per category + overall)
 - [ ] Every finding cites the regulation text that Atlas Vector Search returns
 
-## Rolef: scanner (`backend/scanner`) + Saint track
-- [ ] Playwright crawler: find the privacy, cookie and accessibility statement pages
-- [ ] Cookie check: cookies set *before* consent; banner and reject button present
-- [ ] Accessibility: inject axe-core, map violations to WCAG 2.2 AA
-- [ ] Security: HTTPS, HSTS, CSP, X-Frame-Options, TLS version, mixed content
-- [ ] **Saint:** read the Saint brief and find out what Saint can trigger or call. Goal: Saint as the
-      user's assistant, e.g. "watch my council's website and tell me if it breaks compliance",
-      running scheduled re-scans and sending a summary through Saint. Saint is a separate prize,
-      so it needs a clear demo moment.
+## Rolef: scanner (`backend/scanner`)
+- [x] Playwright crawler: find the privacy, cookie and accessibility statement pages
+- [x] Cookie check: cookies set *before* consent; banner and reject button present
+- [x] Accessibility: inject axe-core, map violations to WCAG 2.2 AA
+- [x] Security: HTTPS, HSTS, CSP, X-Frame-Options, TLS version, mixed content
 
 ## Bogdan: MongoDB Atlas (`backend/db`): MongoDB track (more Atlas features = more points)
 - [ ] Atlas cluster; connection string shared privately, never in git
@@ -53,5 +49,5 @@ Rule: all parts talk to each other through `docs/scan_result.schema.json`. In th
 ## Sunday morning, everyone
 - [ ] Freeze features at 10:00; bug fixes only after that
 - [ ] Record a backup demo video
-- [ ] One pitch, with a slide per track: agent does a real job / Gemini / Atlas features used / Saint demo
+- [ ] One pitch, with a slide per track: agent does a real job / Gemini / Atlas features used
 - [ ] Submit to every track separately before the deadline
