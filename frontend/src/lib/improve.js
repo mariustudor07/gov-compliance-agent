@@ -1,9 +1,11 @@
 import { CATEGORY_LABEL, SEVERITY_ORDER } from "./format";
 
 // Mirrors backend/agent/scoring.py: each category starts at 100 and loses
-// these points per finding; overall is the rounded average. If the backend
+// these points per finding; overall is the rounded average, capped by the
+// worst finding (any critical: max 60, any high: max 80). If the backend
 // formula changes, keep this in step (planFor() checks they still agree).
 export const PENALTY = { critical: 40, high: 20, medium: 10, low: 3, pass: 0 };
+const OVERALL_CAP = { critical: 60, high: 80 };
 
 const CATEGORIES = Object.keys(CATEGORY_LABEL);
 
@@ -15,7 +17,9 @@ function scoresFor(findings) {
       .reduce((sum, f) => sum + (PENALTY[f.severity] ?? 0), 0);
     scores[category] = Math.max(0, 100 - lost);
   }
-  scores.overall = Math.round(CATEGORIES.reduce((sum, c) => sum + scores[c], 0) / CATEGORIES.length);
+  const average = Math.round(CATEGORIES.reduce((sum, c) => sum + scores[c], 0) / CATEGORIES.length);
+  const caps = findings.map((f) => OVERALL_CAP[f.severity]).filter((cap) => cap !== undefined);
+  scores.overall = Math.min(average, ...caps);
   return scores;
 }
 
