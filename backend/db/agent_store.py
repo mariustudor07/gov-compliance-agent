@@ -90,8 +90,11 @@ def _agent_description():
 
 
 class AgentStore:
-    def __init__(self, db=None):
+    def __init__(self, db=None, requested_by="admin script"):
+        """requested_by: who called the AI (Bogdan's design: an individual (IND) calls the AI). Kept anonymous on
+        purpose: logging people's IP addresses would itself be personal data we don't need."""
         self.db = db if db is not None else get_db()
+        self.requested_by = requested_by
         self.context = {}  # scan_id / website for the events of the scan being saved
 
     # --- permission-checked, audited operations ------------------------------------------------
@@ -174,7 +177,7 @@ class AgentStore:
         Everything the agent reads during the scan (e.g. vector search) is tagged with this scan_id."""
         self.scan_id = str(uuid.uuid4())
         self.started_at = _now_ts()
-        self.context = {"scan_id": self.scan_id, "website": url}
+        self.context = {"scan_id": self.scan_id, "website": url, "requested_by": self.requested_by}
 
         # 1. project
         projects = self.find("Projects", {"Repository_URL": url}, "look up the project for this website")

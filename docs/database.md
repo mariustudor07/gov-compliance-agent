@@ -122,6 +122,8 @@ So the permissions are enforced twice: in `AgentStore` and by Atlas itself.
 | Key point: AI may not write Legal_Sources / Compliance_Rules but can view them | code check + Atlas role `govcheck_agent` (verified) | ✅ |
 | Permission table (R/W/M/D) | identical in code and in Atlas | ✅ |
 
+| Top box **IND → AI**: an individual calls the AI | the person scanning on the website; events record `requested_by: "an individual via the website"` (anonymous on purpose: no IP addresses) | ✅ |
+| Bottom box **export → Usr**: the result goes back to the user | the report returned to the website, plus Dawan's PDF download | ✅ |
+
 **Still open (questions for Bogdan):** what "Create a Source ID if the source is new" means (we set `Src_ID = UKGDPR`);
-what `Project_Status = "processed"` should mean (unused); the two unreadable boxes: top ("IND"?) and bottom
-("export → Usr"? If so, Dawan's PDF report download covers it).
+what `Project_Status = "processed"` should mean (unused).

@@ -37,7 +37,7 @@ def scan(req: ScanRequest):
     store = None
     if db_enabled():
         try:
-            store = AgentStore()
+            store = AgentStore(requested_by="an individual via the website")  # IND -> AI on Bogdan's diagram
             store.begin(req.url)
         except Exception as e:  # the database must never cost the user their report
             print(f"MongoDB unavailable, scanning without saving: {e}")
