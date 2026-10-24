@@ -89,14 +89,14 @@ body {
   background: #2563eb;
   top: -12%;
   left: -8%;
-  animation: drift1 24s ease-in-out infinite;
+  animation: drift1 9s ease-in-out infinite;
 }
 
 .bg-aurora span:nth-child(2) {
   background: #7c3aed;
   top: 8%;
   right: -12%;
-  animation: drift2 28s ease-in-out infinite;
+  animation: drift2 11s ease-in-out infinite;
 }
 
 .bg-aurora span:nth-child(3) {
@@ -104,14 +104,14 @@ body {
   bottom: -14%;
   left: 18%;
   opacity: 0.09;
-  animation: drift3 22s ease-in-out infinite;
+  animation: drift3 8s ease-in-out infinite;
 }
 
 .bg-aurora span:nth-child(4) {
   background: #059669;
   bottom: 0%;
   right: 8%;
-  animation: drift4 26s ease-in-out infinite;
+  animation: drift4 10s ease-in-out infinite;
 }
 
 @keyframes drift1 {
@@ -154,10 +154,10 @@ body {
   }
 }
 
-/* A tiled pattern of small shapes (one per compliance category: circle,
-   cross, diamond, hexagon), panning diagonally in a seamless loop. The
-   outer wrapper clips an oversized, offset tile so the animated `transform`
-   never reveals an edge. */
+/* A tiled pattern of 8 varied shapes (circle, cross, diamond, hexagon,
+   triangle, ring, square, star — two per compliance category colour),
+   panning diagonally in a seamless loop. The outer wrapper clips an
+   oversized, offset tile so the animated `transform` never reveals an edge. */
 .bg-shapes-wrap {
   position: fixed;
   inset: 0;
@@ -168,14 +168,14 @@ body {
 
 .bg-shapes {
   position: absolute;
-  top: -150px;
-  left: -150px;
-  width: calc(100% + 300px);
-  height: calc(100% + 300px);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Ccircle cx='28' cy='32' r='7' fill='%232563eb' fill-opacity='0.04' stroke='%232563eb' stroke-opacity='0.14' stroke-width='1.5'/%3E%3Cpath d='M108 20 L124 20 M116 12 L116 28' stroke='%237c3aed' stroke-opacity='0.14' stroke-width='1.6' stroke-linecap='round'/%3E%3Crect x='22' y='106' width='15' height='15' fill='%23b45309' fill-opacity='0.04' stroke='%23b45309' stroke-opacity='0.14' stroke-width='1.5' transform='rotate(45 29.5 113.5)'/%3E%3Cpath d='M118 100 l8 4.6 l0 9.2 l-8 4.6 l-8 -4.6 l0 -9.2 z' fill='%23059669' fill-opacity='0.04' stroke='%23059669' stroke-opacity='0.14' stroke-width='1.5'/%3E%3C/svg%3E");
+  top: -240px;
+  left: -240px;
+  width: calc(100% + 480px);
+  height: calc(100% + 480px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Ccircle cx='30' cy='34' r='7' fill='%232563eb' fill-opacity='0.04' stroke='%232563eb' stroke-opacity='0.16' stroke-width='1.5'/%3E%3Cpath d='M114 16 L130 16 M122 8 L122 24' stroke='%237c3aed' stroke-opacity='0.16' stroke-width='1.6' stroke-linecap='round'/%3E%3Crect x='19' y='115' width='14' height='14' fill='%23b45309' fill-opacity='0.04' stroke='%23b45309' stroke-opacity='0.16' stroke-width='1.5' transform='rotate(45 26 122)'/%3E%3Cpath d='M132 108 l8 4.6 l0 9.2 l-8 4.6 l-8 -4.6 l0 -9.2 z' fill='%23059669' fill-opacity='0.04' stroke='%23059669' stroke-opacity='0.16' stroke-width='1.5'/%3E%3Cpath d='M200 26 l8 16 l-16 0 z' fill='%232563eb' fill-opacity='0.04' stroke='%232563eb' stroke-opacity='0.16' stroke-width='1.5'/%3E%3Ccircle cx='64' cy='186' r='9' fill='none' stroke='%237c3aed' stroke-opacity='0.16' stroke-width='1.4'/%3E%3Ccircle cx='64' cy='186' r='4' fill='none' stroke='%237c3aed' stroke-opacity='0.16' stroke-width='1.4'/%3E%3Crect x='170' y='170' width='12' height='12' fill='%23b45309' fill-opacity='0.04' stroke='%23b45309' stroke-opacity='0.16' stroke-width='1.5'/%3E%3Cpath d='M206 94 l2.4 7.2 L216 104 l-7.6 2.8 L206 114 l-2.4 -7.2 L196 104 l7.6 -2.8 z' fill='%23059669' fill-opacity='0.04' stroke='%23059669' stroke-opacity='0.16' stroke-width='1.5'/%3E%3C/svg%3E");
   background-repeat: repeat;
-  background-size: 150px 150px;
-  animation: shapes-pan 55s linear infinite;
+  background-size: 240px 240px;
+  animation: shapes-pan 20s linear infinite;
   will-change: transform;
 }
 
@@ -184,7 +184,7 @@ body {
     transform: translate(0, 0);
   }
   to {
-    transform: translate(-150px, -150px);
+    transform: translate(-240px, -240px);
   }
 }
 
