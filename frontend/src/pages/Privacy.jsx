@@ -10,6 +10,15 @@ export default function Privacy() {
       </div>
 
       <section className="prose-section">
+        <h2>Who we are</h2>
+        <p>
+          The data controller for GovCheck is the GovCheck project team: four students building this
+          tool at the Encode London 2026 hackathon. We are responsible for deciding how the personal
+          data described below is collected and used.
+        </p>
+      </section>
+
+      <section className="prose-section">
         <h2>What we collect</h2>
         <p>
           When you scan a URL, we store the scan result: the URL you submitted, when it ran, the
@@ -22,6 +31,15 @@ export default function Privacy() {
           you are beyond whatever your browser or network already reveals to any website you visit
           (standard web server logs, kept by our hosting provider, Vercel, and GitHub for the backend,
           not by us specifically).
+        </p>
+      </section>
+
+      <section className="prose-section">
+        <h2>Our lawful basis</h2>
+        <p>
+          Our lawful basis for processing this data under Article 6(1)(f) of the UK GDPR is legitimate
+          interests: we need to store the scan you asked for in order to show you the report and keep
+          a history of past scans. We keep the data we hold to the minimum needed for that purpose.
         </p>
       </section>
 
@@ -78,15 +96,42 @@ export default function Privacy() {
       </section>
 
       <section className="prose-section">
-        <h2>Your rights, and getting in touch</h2>
+        <h2>Your rights</h2>
         <p>
-          If you'd like a scan result removed, or have a question about this policy, the most reliable
-          way to reach us during the hackathon is to open an issue on{" "}
-          <a href="https://github.com/mariustudor07/gov-compliance-agent" target="_blank" rel="noreferrer">
-            the GitHub repository
+          Under the UK GDPR you have the right to access the personal data we hold about you, to ask us
+          to correct it or erase it, to restrict or object to how we process it, and to data
+          portability. You can ask us to delete a scan result at any time.
+        </p>
+      </section>
+
+      <section className="prose-section">
+        <h2>Contact us</h2>
+        <p>
+          You can contact the GovCheck project team about any data protection question by opening an
+          issue at{" "}
+          <a
+            href="https://github.com/mariustudor07/gov-compliance-agent/issues"
+            target="_blank"
+            rel="noreferrer"
+          >
+            github.com/mariustudor07/gov-compliance-agent/issues
           </a>
-          . We don't have a dedicated support inbox set up for a weekend project; we're a team of
-          students, not a company.
+          . We have not appointed a Data Protection Officer, so questions about your personal data go
+          directly to the project team. At the scale of a hackathon prototype the UK GDPR doesn't
+          require one.
+        </p>
+      </section>
+
+      <section className="prose-section">
+        <h2>Complaints</h2>
+        <p>
+          If you're unhappy with how we've handled your data, you have the right to complain to the
+          Information Commissioner's Office (ICO), the UK's data protection regulator, at{" "}
+          <a href="https://ico.org.uk/make-a-complaint/" target="_blank" rel="noreferrer">
+            ico.org.uk/make-a-complaint
+          </a>
+          . We'd appreciate the chance to fix things first, but you don't have to contact us before
+          going to the ICO.
         </p>
       </section>
 

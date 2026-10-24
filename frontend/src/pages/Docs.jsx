@@ -48,7 +48,7 @@ const SECTIONS = [
   {
     id: "ncsc",
     icon: ShieldIcon,
-    color: "#059669",
+    color: "#047857",
     badge: "NCSC guidance",
     title: "Security",
     law: "NCSC guidance, underpinned by UK GDPR Art. 32 (security of processing)",

@@ -24,7 +24,7 @@ const STEPS = [
     icon: ReportIcon,
     title: "Score & explain",
     body: "Gemini turns the evidence into a plain-English report and scores each category 0–100.",
-    color: "#059669", // emerald
+    color: "#047857", // emerald
   },
 ];
 
