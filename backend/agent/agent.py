@@ -19,7 +19,8 @@ from .prompts import CLAUSE_TITLES, SYSTEM_PROMPT
 from .scoring import score
 
 
-def analyse(url):
+def analyse(url, store=None):
+    """store: the scan's AgentStore after store.begin(url), so database reads during the scan belong to it."""
     scan = run_scan(url)
     if scan["blocked"]:
         # Honest "couldn't scan" result: we never blame a site for its bot protection. If Gemini is
@@ -52,7 +53,7 @@ def analyse(url):
         scanner_findings = [f for f in scanner_findings if f["id"] != "ck-banner"]
     # fix library first, then the ranking has the final say on severity (docs/ranking.md)
     findings = rank_all(apply_fixes(scanner_findings + banner + _privacy_findings(scan)), url)
-    summary = _explain_with_gemini(url, findings) or summarise(findings)
+    summary = _explain_with_gemini(url, findings, store) or summarise(findings)
 
     return {
         "url": url,
@@ -102,7 +103,7 @@ def _privacy_findings(scan):
             for clause in missing]
 
 
-def _explain_with_gemini(url, findings):
+def _explain_with_gemini(url, findings, store=None):
     """Gemini adds a regulation + fix to each finding and writes the summary.
     Each finding comes with the matching UK rule and legal text, found by MongoDB Vector Search."""
     if not os.getenv("GEMINI_API_KEY") or not os.getenv("GEMINI_MODEL"):
@@ -110,7 +111,7 @@ def _explain_with_gemini(url, findings):
 
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     problems = [dict(f) for f in findings if f["severity"] != "pass"]
-    for problem, law in zip(problems, search_regulations_batch([f"{p['title']}. {p['evidence']}" for p in problems])):
+    for problem, law in zip(problems, search_regulations_batch([f"{p['title']}. {p['evidence']}" for p in problems], store=store)):
         if law:
             problem["law"] = law  # the rule + legal text Vector Search matched, for Gemini to cite
     try:

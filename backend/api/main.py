@@ -33,10 +33,19 @@ def scan(req: ScanRequest):
         result["url"] = req.url
         return result
 
-    result = analyse(req.url)
+    # Bogdan's workflow: project + law in scope first, then the scan, then the scan record and findings.
+    store = None
     if db_enabled():
-        try:  # saving must never cost the user their report
-            result["id"] = AgentStore().save_scan(result)
+        try:
+            store = AgentStore()
+            store.begin(req.url)
+        except Exception as e:  # the database must never cost the user their report
+            print(f"MongoDB unavailable, scanning without saving: {e}")
+            store = None
+    result = analyse(req.url, store)
+    if store:
+        try:
+            result["id"] = store.finish(result)
         except Exception as e:
             print(f"Could not save scan to MongoDB: {e}")
     return result

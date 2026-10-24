@@ -165,10 +165,16 @@ class AgentStore:
 
     # --- the workflow ---------------------------------------------------------------------------
     def save_scan(self, result):
-        """Stores one GovCheck result following Bogdan's workflow. Returns the Scan_ID."""
-        url = result["url"]
-        scan_id = str(uuid.uuid4())
-        self.context = {"scan_id": scan_id, "website": url}
+        """Both halves at once, for a result scanned without begin() (e.g. scripts). Returns the Scan_ID."""
+        self.begin(result["url"])
+        return self.finish(result)
+
+    def begin(self, url):
+        """Steps 1-2 of Bogdan's workflow, BEFORE scanning: project, then the law in scope.
+        Everything the agent reads during the scan (e.g. vector search) is tagged with this scan_id."""
+        self.scan_id = str(uuid.uuid4())
+        self.started_at = _now_ts()
+        self.context = {"scan_id": self.scan_id, "website": url}
 
         # 1. project
         projects = self.find("Projects", {"Repository_URL": url}, "look up the project for this website")
@@ -182,14 +188,20 @@ class AgentStore:
             self.insert("Projects", project, "new website scanned for the first time")
 
         # 2. compliance scope -> legal sources -> rules
-        sources = self.find("Legal_Sources", {"Juristiction": {"$regex": "UK"}, "Status": {"$ne": "archhived"}},
-                            "legal sources relevant to a UK website")
+        sources = self.find("Legal_Sources", {"Juristiction": {"$regex": project["Juristiction"]},
+                                              "Status": {"$ne": "archhived"}},
+                            f"legal sources relevant to the project ({project['Juristiction']})")
         prefixes = tuple(SCOPE_RULES[s] for s in project["Compliance_Scope"] if s in SCOPE_RULES)
         rules = [r for r in self.find("Compliance_Rules",
                                       {"Status": "Active", "Src_ID": {"$in": [s["Src_ID"] for s in sources]}},
                                       "rules from those sources")
                  if r["Rule_ID"].startswith(prefixes)]
-        rule_ids = {r["Rule_ID"] for r in rules}
+        self.project = project
+        self.rule_ids = {r["Rule_ID"] for r in rules}
+
+    def finish(self, result):
+        """Steps 3-5, AFTER scanning: the scan record, its findings, project marked scanned. Returns the Scan_ID."""
+        url, scan_id, project, rule_ids = result["url"], self.scan_id, self.project, self.rule_ids
 
         # 3. scan
         kept = [f for f in result["findings"] if rule_for(f["id"]) in rule_ids]
@@ -202,7 +214,7 @@ class AgentStore:
                         "pages_crawled": result.get("pages_crawled", []),
                         "findings_out_of_scope": len(result["findings"]) - len(kept)},
             "Files_Scanned": len(result.get("pages_crawled", [])),
-            "Started_At": _now_ts(), "Finished_At": _now_ts()}, "scan finished")
+            "Started_At": self.started_at, "Finished_At": _now_ts()}, "scan finished")
 
         # 4. findings
         for f in kept:

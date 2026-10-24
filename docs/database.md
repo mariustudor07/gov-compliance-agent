@@ -108,3 +108,20 @@ read/write/modify/delete was attempted directly against Atlas (bypassing our cod
 the role matches the permission table exactly (Atlas answers "user is not allowed to do action [...]"
 otherwise), and Training_Labels is fully off-limits. A full scan (Gemini + Vector Search) saves fine under it.
 So the permissions are enforced twice: in `AgentStore` and by Atlas itself.
+
+## Checked against Bogdan's paper design (24 Oct, ~00:15)
+| On paper | In Atlas / code | |
+|---|---|---|
+| 1. Create project: ID, creation date, statuses, "Scanned" defaults to unscanned | `Projects` created with `Project_Status = "unscanned"` | ✅ |
+| Creation Event: "set details of what the agent did" | every event's `details`: what, reason, scan, website, agent, fields/query/from→to | ✅ |
+| 2. Compliance scope informs what's scanned; query Legal_Sources for project-relevant sources (accessed event) | sources matched to the project's jurisdiction; `Compliance_Scope` picks the rules | ✅ (WCAG 2.2 was skipped until its jurisdiction said UK; fixed) |
+| Use sources + context to query Compliance_Rules (AE) | rules from those sources, in scope; + vector-search reads during the scan | ✅ |
+| 3. Create a new scan for the project (CE) | `Code_Scans` (Started_At = when step 1 began) | ✅ |
+| 4. Create findings documents (CE) | `Findings`, one per finding, linked to a rule | ✅ |
+| Key point: every access / modify / create by the AI → event; not for events themselves | all agent reads/writes go through `AgentStore`; events tagged with the scan | ✅ (vector-search reads used to come before the project and untagged; fixed: `begin()` → scan → `finish()`) |
+| Key point: AI may not write Legal_Sources / Compliance_Rules but can view them | code check + Atlas role `govcheck_agent` (verified) | ✅ |
+| Permission table (R/W/M/D) | identical in code and in Atlas | ✅ |
+
+**Still open (questions for Bogdan):** what "Create a Source ID if the source is new" means (we set `Src_ID = UKGDPR`);
+what `Project_Status = "processed"` should mean (unused); the two unreadable boxes: top ("IND"?) and bottom
+("export → Usr"? If so, Dawan's PDF report download covers it).

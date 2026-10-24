@@ -55,7 +55,7 @@ LEGAL_SOURCES = [
      "Src_Version": "2010 c. 15 (s.20 duty to make adjustments: applies to private service providers too)",
      "Status": "active", "Published_At": _d(2010, 4, 8), "Reviewed_At": TODAY},
     {"Src_ID": "WCAG22", "Src_Title": "Web Content Accessibility Guidelines (WCAG) 2.2", "Src_Type": "standard",
-     "Juristiction": "International (the AA level is required by PSBAR2018)", "Src_Publisher": "W3C",
+     "Juristiction": "UK (required by PSBAR 2018 reg. 6); international W3C standard", "Src_Publisher": "W3C",
      "Src_URL": "https://www.w3.org/TR/WCAG22/", "Src_Version": "2.2 W3C Recommendation",
      "Status": "active", "Published_At": _d(2023, 10, 5), "Reviewed_At": TODAY},
     {"Src_ID": "NCSC-TLS", "Src_Title": "Using TLS to protect data", "Src_Type": "guidance",

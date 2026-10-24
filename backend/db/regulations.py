@@ -17,13 +17,14 @@ def _compact(rules):
              "law_url": (r.get("Legal_Text_URLs") or [""])[0]} for r in rules]
 
 
-def search_regulations_batch(queries: list[str], limit: int = 2) -> list[list[dict]]:
-    """The matching rules for several problems, using ONE Voyage request. [] per query if unavailable."""
+def search_regulations_batch(queries: list[str], limit: int = 2, store=None) -> list[list[dict]]:
+    """The matching rules for several problems, using ONE Voyage request. [] per query if unavailable.
+    Pass the scan's AgentStore so the rule reads are logged as part of that scan."""
     if not queries or not db_enabled() or not os.getenv("VOYAGE_API_KEY"):
         return [[] for _ in queries]
     try:
         from .agent_store import AgentStore
-        return [_compact(rules) for rules in AgentStore().search_rules_batch(queries, limit)]
+        return [_compact(rules) for rules in (store or AgentStore()).search_rules_batch(queries, limit)]
     except Exception as e:
         print(f"search_regulations failed: {e}")
         return [[] for _ in queries]
