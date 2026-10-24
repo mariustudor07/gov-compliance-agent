@@ -9,6 +9,7 @@ from .accessibility import run_axe
 
 # Links whose URL or text contains one of these are worth visiting.
 KEYWORDS = ("privacy", "cookie", "accessibility", "data-protection")
+SHORT_PAGE_CHARS = 3000  # a privacy page shorter than this is probably a hub linking to the real policy
 
 
 def crawl(url, max_pages=5):
@@ -34,26 +35,49 @@ def crawl(url, max_pages=5):
         response = _goto(page, url)
         # Nothing has been clicked yet, so every cookie here was set without consent.
         cookies_before_consent = context.cookies()
+        homepage_screenshot = page.screenshot()  # what a first-time visitor sees, cookie banner included
         pages.append(_snapshot(page, response))
 
         host = urlparse(page.url).netloc
-        links = page.eval_on_selector_all("a[href]", "els => els.map(e => [e.href, e.innerText])")
-        wanted = []
-        for href, label in links:
-            text = (href + " " + label).lower()
-            if urlparse(href).netloc == host and any(k in text for k in KEYWORDS) and href not in wanted:
-                wanted.append(href)
+        wanted = _matching_links(page, host, KEYWORDS)
+        visited = {page.url}
 
         for href in wanted[: max_pages - 1]:
             try:
                 response = _goto(page, href)
                 pages.append(_snapshot(page, response))
+                visited.add(page.url)
             except Exception as e:
                 print(f"Could not open {href}: {e}")
+                continue
+            # Many sites link to a short privacy "hub" page that links on to the real policy.
+            # Follow those links one level deeper so we read the actual notice.
+            if "privacy" in page.url.lower() and len(pages[-1]["text"]) < SHORT_PAGE_CHARS:
+                deeper = [h for h in _matching_links(page, host, ("privacy",)) if h not in visited]
+                for deep in deeper[:2]:
+                    try:
+                        response = _goto(page, deep)
+                        pages.append(_snapshot(page, response))
+                        visited.add(page.url)
+                    except Exception as e:
+                        print(f"Could not open {deep}: {e}")
 
         browser.close()
 
-    return {"pages": pages, "cookies_before_consent": cookies_before_consent}
+    return {"pages": pages, "cookies_before_consent": cookies_before_consent,
+            "homepage_screenshot": homepage_screenshot}
+
+
+def _matching_links(page, host, keywords):
+    """Same-site links whose URL or text contains one of the keywords, in page order, no duplicates."""
+    links = page.eval_on_selector_all("a[href]", "els => els.map(e => [e.href, e.innerText])")
+    found = []
+    for href, label in links:
+        href = href.split("#")[0]
+        text = (href + " " + label).lower()
+        if urlparse(href).netloc == host and any(k in text for k in keywords) and href not in found:
+            found.append(href)
+    return found
 
 
 def _goto(page, url):

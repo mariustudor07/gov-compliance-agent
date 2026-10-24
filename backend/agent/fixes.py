@@ -9,6 +9,12 @@ FIXES = {
     "ck-preconsent": ("PECR reg. 6",
                       "Don't load analytics or advertising scripts until the user clicks Accept. Use a consent "
                       "manager that blocks these tags by default, and set only strictly necessary cookies on first load."),
+    "ck-banner-noreject": ("PECR reg. 6; ICO guidance on cookies",
+                           "Add a 'Reject all' button next to 'Accept all' on the first screen of the banner."),
+    "ck-banner-unequal": ("PECR reg. 6; ICO guidance on cookies",
+                          "Make 'Reject all' the same size, colour weight and position as 'Accept all'."),
+    "ck-banner-preticked": ("PECR reg. 6; UK GDPR Art. 4(11) (consent must be an active choice)",
+                            "Untick all non-essential cookie categories by default."),
     "sec-https": ("NCSC guidance: Using TLS to protect data",
                   "Serve the whole site over HTTPS with a valid certificate and redirect all http:// requests to https://."),
     "sec-strict-transport-security": ("NCSC guidance: Using TLS to protect data",
@@ -23,6 +29,9 @@ FIXES = {
                          "sites can't embed yours in a frame."),
     "pv-none": ("UK GDPR Art. 13",
                 "Publish a privacy notice and link to it from every page (usually in the footer)."),
+    "pv-short": ("UK GDPR Art. 12-13",
+                 "Make sure the full privacy notice is a normal web page (not a PDF or behind a script) and is "
+                 "linked clearly from every page, e.g. 'Privacy notice' in the footer."),
     "pv-controller": ("UK GDPR Art. 13(1)(a)",
                       "State the legal name and address of the organisation (or person) responsible for the data, "
                       "e.g. 'Example Ltd, 1 High Street, London, is the data controller.'"),
@@ -66,6 +75,10 @@ AXE_FIXES = {
 # Why each finding got its severity (shown in the report as "Why critical/high/...").
 SEVERITY_REASONS = {
     "ck-preconsent": "Tracking starts before the visitor can say no, so PECR consent is never actually given.",
+    "ck-banner-noreject": "If refusing takes more effort than accepting, consent isn't freely given, so it isn't valid.",
+    "ck-banner-unequal": "Nudging people towards 'Accept' with design undermines free choice, which the ICO "
+                         "treats as invalid consent.",
+    "ck-banner-preticked": "Pre-ticked boxes are not consent under UK GDPR; the user never actively agreed.",
     "sec-https": "Everything sent to the site, including logins and form data, can be read or changed in transit.",
     "sec-strict-transport-security": "Without HSTS, an attacker on the same network can downgrade a visitor's first "
                                      "request to unencrypted HTTP.",
@@ -73,6 +86,8 @@ SEVERITY_REASONS = {
                                    "recommended, but not a legal requirement on its own.",
     "sec-x-content-type-options": "It only blocks a narrow class of browser content-sniffing attacks.",
     "sec-clickjacking": "Another site could embed this one invisibly and trick users into clicking its buttons.",
+    "pv-short": "We couldn't read a full notice, so we can't confirm the required information is there. "
+                "If we can't find it, visitors may not either.",
     "pv-none": "UK GDPR requires this information whenever personal data is collected; without a notice, "
                "nothing else can be checked.",
 }

@@ -11,6 +11,7 @@ from ml.classify import missing_clauses, model_name
 from scanner.findings import finding
 from scanner.scan import run_scan
 
+from .banner import check_banner
 from .fixes import apply_fixes, summarise
 from .prompts import CLAUSE_TITLES, SYSTEM_PROMPT
 from .scoring import score
@@ -18,7 +19,8 @@ from .scoring import score
 
 def analyse(url):
     scan = run_scan(url)
-    findings = apply_fixes(scan["findings"] + _privacy_findings(scan))
+    banner = check_banner(scan["homepage_screenshot"], scan["pages_crawled"][0])
+    findings = apply_fixes(scan["findings"] + banner + _privacy_findings(scan))
     summary = _explain_with_gemini(url, findings) or summarise(findings)
 
     return {
@@ -31,12 +33,21 @@ def analyse(url):
     }
 
 
+MIN_POLICY_WORDS = 250  # shorter than this, there's not enough text to judge which clauses are missing
+
+
 def _privacy_findings(scan):
     """Runs OUR classifier on the privacy policy."""
-    page = next((p for p in scan["pages_crawled"] if "privacy" in p.lower()), "")
+    page = scan["privacy_page"]
     if not scan["privacy_text"]:
         return [finding("pv-none", "privacy", "critical", "No privacy notice found",
                         evidence="no privacy page linked from the homepage", regulation="UK GDPR Art. 13")]
+    words = len(scan["privacy_text"].split())
+    if words < MIN_POLICY_WORDS:
+        # Too little text to judge: probably a menu page or a policy we couldn't load.
+        # Better to say so than to report every clause as missing.
+        return [finding("pv-short", "privacy", "medium", "Couldn't find a full privacy notice",
+                        evidence=f"the privacy page we found has only {words} words", page=page)]
 
     missing = missing_clauses(scan["privacy_text"])
     if not missing:
