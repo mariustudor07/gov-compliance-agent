@@ -1,0 +1,413 @@
+{
+  "Findings": {
+    "$jsonSchema": {
+      "title": "findings",
+      "bsonType": "object",
+      "required": [
+        "Finding_ID",
+        "Scan_ID",
+        "Project_ID",
+        "Rule_ID",
+        "File_Path",
+        "Severity",
+        "Status",
+        "Evidence",
+        "Explanation",
+        "Reccomendation",
+        "Confidence_Score",
+        "Created_At",
+        "Line_Start"
+      ],
+      "properties": {
+        "Finding_ID": {
+          "bsonType": "string",
+          "description": "Finding_ID must be a string"
+        },
+        "Scan_ID": {
+          "bsonType": "string",
+          "description": "Scan_ID must be a string"
+        },
+        "Project_ID": {
+          "bsonType": "string",
+          "description": "Project_ID must be a string"
+        },
+        "Rule_ID": {
+          "bsonType": "string",
+          "description": "Rule_ID must be a string"
+        },
+        "File_Path": {
+          "bsonType": "string",
+          "description": "File-Path must be a string"
+        },
+        "Explanation": {
+          "bsonType": "string",
+          "description": "Explanation must be a string"
+        },
+        "Reccomendation": {
+          "bsonType": "string",
+          "description": "Reccomendation must be a string"
+        },
+        "Severity": {
+          "enum": [
+            "Critical",
+            "High",
+            "Medium",
+            "Low",
+            "Pass"
+          ],
+          "description": "permissable strings returned for severity"
+        },
+        "Status": {
+          "enum": [
+            "Open",
+            "Confirmed",
+            "False_Positive",
+            "Resolved",
+            "Accepted_Risk"
+          ]
+        },
+        "Line_Start": {
+          "bsonType": [
+            "int",
+            "long",
+            "null"
+          ]
+        },
+        "Confidence_Score": {
+          "bsonType": [
+            "double",
+            "int",
+            "decimal",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "Evidence": {
+          "bsonType": "object"
+        },
+        "Created_At": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "Projects": {
+    "$jsonSchema": {
+      "title": "Projects_Validifiers",
+      "bsonType": "object",
+      "required": [
+        "Project_ID",
+        "Project_Title",
+        "Repository_URL",
+        "Environnement",
+        "Juristiction",
+        "Src_ID",
+        "Compliance_Scope",
+        "Project_Created",
+        "Project_Status"
+      ],
+      "properties": {
+        "Project_ID": {
+          "bsonType": "string",
+          "description": "Project_ID must be a string"
+        },
+        "Project_Title": {
+          "bsonType": "string",
+          "description": "Project title must be a string"
+        },
+        "Repository_URL": {
+          "bsonType": "string",
+          "description": "repository URL must be a string"
+        },
+        "Environnement": {
+          "bsonType": "string",
+          "description": "environnement must be a string"
+        },
+        "Juristiction": {
+          "bsonType": "string",
+          "description": "juristiction must be a string"
+        },
+        "Src_ID": {
+          "bsonType": "string",
+          "description": "source ID  must be a string"
+        },
+        "Project_Created": {
+          "bsonType": "date",
+          "description": "Project creation must be a date"
+        },
+        "Project_Status": {
+          "enum": [
+            "unscanned",
+            "scanned",
+            "processed"
+          ],
+          "description": "Project status must be one iof 3 strings listed above"
+        },
+        "Compliance_Scope": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string"
+          },
+          "description": "compliance scope must be an array of strings"
+        }
+      }
+    }
+  },
+  "Audit_Events": {
+    "$jsonSchema": {
+      "title": "Audit_Events",
+      "bsonType": "object",
+      "required": [
+        "Event_ID",
+        "Event_Type",
+        "Entity_Type",
+        "Entity_ID",
+        "Actor",
+        "Timestamp",
+        "details"
+      ],
+      "properties": {
+        "Event_ID": {
+          "bsonType": "string",
+          "description": "Event_ID must be a string"
+        },
+        "Event_Type": {
+          "enum": [
+            "update",
+            "accessed",
+            "created"
+          ],
+          "description": "Event type  must be a string listed above"
+        },
+        "Entity_ID": {
+          "bsonType": "string",
+          "description": "Entity must be a string"
+        },
+        "Entity_Type": {
+          "enum": [
+            "Project",
+            "Rule",
+            "Scan",
+            "finding",
+            "Audit"
+          ]
+        },
+        "Actor": {
+          "bsonType": "string",
+          "description": "Actor must be a string"
+        },
+        "Timestamp": {
+          "bsonType": "timestamp"
+        },
+        "details": {
+          "bsonType": "object"
+        }
+      }
+    }
+  },
+  "Code_Scans": {
+    "$jsonSchema": {
+      "title": "Code_Scans_rules",
+      "bsonType": "object",
+      "required": [
+        "Scan_ID",
+        "Project_ID",
+        "Commit_Sha",
+        "Status",
+        "Ruleset_Version",
+        "Summary",
+        "Files_Scanned",
+        "Started_At",
+        "Finished_At"
+      ],
+      "properties": {
+        "Scan_ID": {
+          "bsonType": "string",
+          "description": "Scan_ID must be a string"
+        },
+        "Project_ID": {
+          "bsonType": "string",
+          "description": "Project must be a string"
+        },
+        "Ruleset_Version": {
+          "bsonType": "string",
+          "description": "Ruleset_Version must be a string"
+        },
+        "Commit_Sha": {
+          "bsonType": "string",
+          "description": "Commit_Sha must be a string"
+        },
+        "Status": {
+          "enum": [
+            "running",
+            "queued",
+            "completed",
+            "failed"
+          ],
+          "description": "Status must be a string from above"
+        },
+        "Started_At": {
+          "bsonType": "timestamp"
+        },
+        "Finished_At": {
+          "bsonType": "timestamp"
+        },
+        "Files_Scanned": {
+          "bsonType": "int",
+          "description": "Files_Scanned must be an integer"
+        },
+        "Summary": {
+          "bsonType": "object",
+          "description": "summary must be an Object type"
+        }
+      }
+    }
+  },
+  "Legal_Sources": {
+    "$jsonSchema": {
+      "title": "findings",
+      "bsonType": "object",
+      "required": [
+        "Src_ID",
+        "Src_Title",
+        "Src_Type",
+        "Juristiction",
+        "Src_Punlisher",
+        "Src_URL",
+        "Src_Version",
+        "Status",
+        "Published_At",
+        "Reviewed_At"
+      ],
+      "properties": {
+        "Src_ID": {
+          "bsonType": "string",
+          "description": "Src_ID must be a string"
+        },
+        "Src_Title": {
+          "bsonType": "string",
+          "description": "Src_Title must be a string"
+        },
+        "Src_Type": {
+          "bsonType": "string",
+          "description": "source type  must be a string"
+        },
+        "Juristiction": {
+          "bsonType": "string",
+          "description": "juristiction must be a string"
+        },
+        "Src_Publisher": {
+          "bsonType": "string",
+          "description": "publisher must be a string"
+        },
+        "Src_URL": {
+          "bsonType": "string",
+          "description": "source URL must be a string"
+        },
+        "Reviewed_At": {
+          "bsonType": "date",
+          "description": "reviewed at date must be a date"
+        },
+        "Published_At": {
+          "bsonType": "date",
+          "description": "Published At date must be a date"
+        },
+        "Src_version": {
+          "bsonType": "string"
+        },
+        "Status": {
+          "enum": [
+            "active",
+            "under review",
+            "archhived"
+          ]
+        }
+      }
+    }
+  },
+  "Compliance_Rules": {
+    "$jsonSchema": {
+      "title": "Compliance_Rules_Validators",
+      "bsonType": "object",
+      "required": [
+        "Rule_Title",
+        "Rule_ID",
+        "Category",
+        "Description",
+        "Src_ID",
+        "Requirement",
+        "Check_Mthd",
+        "Severity",
+        "Rule_Version",
+        "Status"
+      ],
+      "properties": {
+        "Rule_Title": {
+          "bsonType": "string",
+          "description": "Rule title must be a string"
+        },
+        "Rule_ID": {
+          "bsonType": "string",
+          "description": "Rule id title must be a string"
+        },
+        "Source_ID": {
+          "bsonType": "string",
+          "description": "source id title must be a string"
+        },
+        "Description": {
+          "bsonType": "string",
+          "description": "description must be a string"
+        },
+        "Requirement": {
+          "bsonType": "string",
+          "description": "rule requirement must be a string"
+        },
+        "Check_Mthd": {
+          "bsonType": "string",
+          "description": "check method must be a string"
+        },
+        "Rule_Version": {
+          "bsonType": "double",
+          "description": "Rule version must be a double"
+        },
+        "Category": {
+          "enum": [
+            "controller",
+            "purpose",
+            "lawful_basics",
+            "rights",
+            "retention",
+            "contact_dpo",
+            "third_parties",
+            "complaints_ico",
+            "data_collected",
+            "cookies",
+            "security",
+            "automated_decisions",
+            "other"
+          ],
+          "description": "categories available to check against"
+        },
+        "Severity": {
+          "enum": [
+            "Critical",
+            "High",
+            "Medium",
+            "low"
+          ],
+          "description": "severity the rule indicates"
+        },
+        "Status": {
+          "enum": [
+            "Draft",
+            "Active",
+            "Retired",
+            "Not_reviewed"
+          ],
+          "description": "status of the rule for comparison validity"
+        }
+      }
+    }
+  }
+}
