@@ -22,7 +22,7 @@ Rule: all parts talk to each other through `docs/scan_result.schema.json`. In th
       screenshot, and for sites that block us it reads the privacy notice via Google (our model checks the quotes)
 - [x] Score function (0-100 per category + overall), built-in fix library so reports work without Gemini
 - [ ] After the checkpoint: every finding cites the regulation text from Atlas Vector Search (needs Bogdan's DB)
-- [ ] After the checkpoint: `security.txt` check; port Rolef's sitemap discovery onto the current crawler
+- [x] `security.txt` check (Rolef, `scanner/security.py`); sitemap discovery is in the Scrapling crawler (PR #8)
 
 ## Rolef: scanner (`backend/scanner`)
 - [x] Playwright crawler: find the privacy, cookie and accessibility statement pages

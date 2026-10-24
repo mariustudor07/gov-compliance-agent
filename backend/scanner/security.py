@@ -2,9 +2,10 @@
 import socket
 import ssl
 from datetime import datetime, timezone
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
+from scrapling.fetchers import Fetcher
 
 from .findings import finding
 
@@ -45,7 +46,52 @@ def check_security(crawl_result):
         present = [h for h in list(REQUIRED_HEADERS) + ["x-frame-options"] if h in headers]
         findings.append(finding("sec-pass", "security", "pass", "HTTPS and security headers in place",
                                 evidence="headers present: " + ", ".join(present), page=home["url"]))
+    findings.append(_security_txt_finding(home["url"]))
     return findings
+
+
+def _security_txt_finding(url):
+    """RFC 9116 security.txt: tells researchers how to report a vulnerability. Needs Contact and a future Expires."""
+    location = urljoin(url, "/.well-known/security.txt")
+    fix = ("Publish /.well-known/security.txt with a Contact: line (email or URL for reporting vulnerabilities) "
+           "and an Expires: date less than a year ahead. GOV.UK publishes one you can copy.")
+    try:
+        # A public file on the site we're auditing: read it even on a bad certificate (reported above).
+        response = Fetcher.get(location, timeout=10, retries=1, verify=False, stealthy_headers=False)
+        text = response.body.decode("utf-8", "replace") if response.status == 200 else ""
+    except Exception as e:
+        print(f"Could not read security.txt: {e}")
+        return finding("sec-security-txt", "security", "low", "No security.txt (vulnerability contact)",
+                       evidence=f"could not fetch {location}", page=location,
+                       regulation="NCSC guidance: Vulnerability disclosure", fix=fix)
+
+    fields = {}
+    for line in text.splitlines():
+        name, sep, value = line.partition(":")
+        if sep and not line.startswith("#"):
+            fields.setdefault(name.strip().lower(), value.strip())
+    # Many sites answer every unknown URL with their homepage, so a 200 alone proves nothing.
+    if "contact" not in fields:
+        return finding("sec-security-txt", "security", "low", "No security.txt (vulnerability contact)",
+                       evidence=f"{location}: HTTP {response.status}, no Contact: line", page=location,
+                       regulation="NCSC guidance: Vulnerability disclosure", fix=fix)
+
+    expires = _parse_date(fields.get("expires", ""))
+    if expires is None or expires < datetime.now(timezone.utc):
+        problem = "has expired" if expires else "has no valid Expires: date"
+        return finding("sec-security-txt", "security", "low", f"security.txt {problem}",
+                       evidence=f"Contact: {fields['contact']}; Expires: {fields.get('expires', 'missing')}",
+                       page=location, regulation="NCSC guidance: Vulnerability disclosure", fix=fix)
+    return finding("sec-security-txt", "security", "pass", "security.txt says how to report vulnerabilities",
+                   evidence=f"Contact: {fields['contact']}; Expires: {fields['expires']}", page=location)
+
+
+def _parse_date(value):
+    try:
+        date = datetime.fromisoformat(value.upper().replace("Z", "+00:00"))  # Google writes "...00:00:00z"
+    except ValueError:
+        return None
+    return date if date.tzinfo else date.replace(tzinfo=timezone.utc)
 
 
 def _tls_findings(url):
