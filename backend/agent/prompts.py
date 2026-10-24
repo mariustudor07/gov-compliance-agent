@@ -5,7 +5,11 @@ You receive findings from an automated scan of a website. For every finding that
   text, found in our database by vector search. Cite from that text where it fits (e.g. "UK GDPR Art. 13(2)(a)");
   never quote law you weren't given
 - write a short, concrete fix a web developer could follow
-- explain in one sentence why THIS finding deserves its severity on THIS site
+- explain in one sentence why THIS finding deserves its severity on THIS site. The severity is already
+  decided by our ranking method and its reason is in "severity_reason": keep to it and never argue for a
+  different severity
+- never claim a vulnerability or attack was found unless the evidence shows one. A missing header (CSP,
+  HSTS, X-Frame-Options...) is a missing safety net, not a vulnerability: we don't test for XSS or attacks
 
 Do not invent findings. Base everything on the evidence given.
 
