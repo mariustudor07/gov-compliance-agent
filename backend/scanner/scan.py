@@ -1,4 +1,6 @@
 """run_scan(url) is the scanner's single entry point. The agent calls only this."""
+from urllib.parse import urlparse
+
 from .accessibility import check_accessibility
 from .blocked import blocked_reason
 from .cookies import check_cookies
@@ -24,7 +26,7 @@ def run_scan(url):
 
     # Skip error pages (404 etc.): a "page not found" is not a privacy notice.
     privacy_pages = [p for p in crawl_result["pages"]
-                     if any(w in p["url"].lower() for w in PRIVACY_WORDS) and p["status"] < 400]
+                     if any(w in urlparse(p["url"]).path.lower() for w in PRIVACY_WORDS) and p["status"] < 400]
     # Pick the page that looks most like a real notice, not a news article, cookie page or list of notices.
     privacy_page = best_notice(privacy_pages)
     privacy_text = privacy_page["text"] if privacy_page else ""

@@ -73,7 +73,7 @@ def run_new():
 
     from agent.agent import MIN_POLICY_WORDS
     from ml.classify import classify_sentences
-    from scanner.crawler import USER_AGENT, _goto
+    from ml.browser import USER_AGENT, goto as _goto
 
     urls = [u.strip() for u in (DATA / "test_policies.txt").read_text().splitlines()
             if u.strip() and not u.startswith("#")]
@@ -125,7 +125,8 @@ def _find_policy(browser, homepage):
     pages), skip error pages, and return the longest privacy page found."""
     from urllib.parse import urlparse
 
-    from scanner.crawler import SHORT_PAGE_CHARS, USER_AGENT, _goto, _matching_links
+    from ml.browser import USER_AGENT, goto as _goto, matching_links as _matching_links
+    from scanner.crawler import SHORT_PAGE_CHARS
     from scanner.privacy_page import best_notice, link_rank
 
     context = browser.new_context(user_agent=USER_AGENT, locale="en-GB")

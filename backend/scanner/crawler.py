@@ -149,7 +149,9 @@ def _matching(links, host, keywords):
         if not href.startswith("http"):
             continue
         href = href.split("#")[0]
-        text = (href + " " + label).lower()
+        # Match on the page address and link text, not the query string: Tesco's "/zones/our-commitment
+        # ?icid=privacy_hub_your_data" is a tracking code, not a privacy page.
+        text = (urlparse(href).path + " " + label).lower()
         if urlparse(href).netloc == host and any(k in text for k in keywords) and _same_page(href) not in seen:
             found.append(href)
             seen.add(_same_page(href))

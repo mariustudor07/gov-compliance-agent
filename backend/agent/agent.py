@@ -62,6 +62,7 @@ def analyse(url):
     }
 
 
+SUSPICIOUS_MISSING = 5  # of the 8 required clauses; see _privacy_findings
 MIN_POLICY_WORDS = 250  # shorter than this, there's not enough text to judge which clauses are missing
 
 
@@ -79,6 +80,12 @@ def _privacy_findings(scan):
                         evidence=f"the privacy page we found has only {words} words", page=page)]
 
     missing = missing_clauses(scan["privacy_text"])
+    if len(missing) >= SUSPICIOUS_MISSING:
+        # Missing almost everything usually means we read a hub or the wrong page (e.g. Tesco's
+        # /zones/privacy-centre), not that the policy is that bad. Let Gemini find the real notice via Google.
+        fallback = privacy_via_gemini(scan["pages_crawled"][0])
+        if fallback:
+            return fallback[1]
     if not missing:
         return [finding("pv-complete", "privacy", "pass",
                         "Privacy notice covers all required UK GDPR Art. 13 information",
