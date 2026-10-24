@@ -13,16 +13,16 @@ Rule: all parts talk to each other through `docs/scan_result.schema.json`. In th
 - [ ] Bogdan: collect the $100 Atlas credit at the MongoDB booth
 
 ## AI / ML lead (`backend/agent`, `backend/ml`): Gemini track
-- [ ] **Review the 285 flagged labels:** `cd backend` → `python -m ml.review` (≈25 min), then retrain.
+- [x] Review the 285 flagged labels (284 reviewed, 40 corrected)
+- [ ] **Review the 135 sentences moved into the new categories:** double-click `review.bat`, then retrain.
       Why this matters: see "Why we review labels by hand" in `docs/model_results.md`.
-- [ ] Gemini 4 Argon agent loop with tools: `crawl(url)`, `check_cookies`, `check_a11y`,
-      `check_security`, `search_regulations(query)` (Bogdan's vector search), `save_report`.
-      The agent decides which pages to inspect and writes the report, so it does a whole job, not just chat.
-- [ ] Our own ML model: a privacy-policy clause classifier (controller, lawful_basis, rights,
-      retention, contact_dpo, third_parties, other). Gemini pre-labels ~400 sentences, we correct them,
-      then train TF-IDF + LogisticRegression and put precision/recall in `docs/`. Stretch goal: DistilBERT.
-- [ ] Score function (0-100 per category + overall)
-- [ ] Every finding cites the regulation text that Atlas Vector Search returns
+- [x] Our own ML model: privacy-clause classifier, 13 labels, 765 sentences. TF-IDF + sentence embeddings
+      + linear SVM: 70% per sentence, ~95% per policy (tested on 233 UK sites). See `docs/model_results.md`.
+- [x] Gemini 4 Argon (`gemini-4-argon`): site-specific fixes + summary, cookie banner judged from a
+      screenshot, and for sites that block us it reads the privacy notice via Google (our model checks the quotes)
+- [x] Score function (0-100 per category + overall), built-in fix library so reports work without Gemini
+- [ ] After the checkpoint: every finding cites the regulation text from Atlas Vector Search (needs Bogdan's DB)
+- [ ] After the checkpoint: `security.txt` check; port Rolef's sitemap discovery onto the current crawler
 
 ## Rolef: scanner (`backend/scanner`)
 - [x] Playwright crawler: find the privacy, cookie and accessibility statement pages
