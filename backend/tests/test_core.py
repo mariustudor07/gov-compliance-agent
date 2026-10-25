@@ -91,3 +91,45 @@ def test_known_jurisdiction_links_its_main_law():
     store = AgentStore(db=NoDatabase())
     store.find = lambda collection, query, why: [{"Src_ID": query["Src_ID"]}]
     assert store._governing_source("UK") == "UKGDPR"
+
+
+# --- scanner: choosing which pages to open (scanner/crawler.py, scanner/privacy_page.py) ------------
+from scanner.crawler import PAGE_TYPES, _page_rank  # noqa: E402
+from scanner.privacy_page import looks_like_notice  # noqa: E402
+
+BRIGHTON = "https://www.brighton-hove.gov.uk"
+
+
+def best(urls, words):
+    return min(urls, key=lambda u: _page_rank(u, words))
+
+
+def test_site_privacy_hub_beats_service_notices_and_directory_entries():
+    # Brighton's homepage has no privacy link; these are from its sitemap.
+    sitemap = [f"{BRIGHTON}/directory-entry/information-governance-team-data-protection",
+               f"{BRIGHTON}/carers-survey-privacy-notice",
+               f"{BRIGHTON}/about-website/consultation-privacy-notices/parking-consultation-privacy-notice",
+               f"{BRIGHTON}/about-website/privacy-and-data"]
+    assert best(sitemap, PAGE_TYPES[0]) == f"{BRIGHTON}/about-website/privacy-and-data"
+
+
+def test_keyword_in_parent_folder_loses_to_keyword_in_page_name():
+    links = [f"{BRIGHTON}/about-website/website-and-accessibility/languages",
+             f"{BRIGHTON}/about-website/accessibility-statement"]
+    assert best(links, PAGE_TYPES[2]) == f"{BRIGHTON}/about-website/accessibility-statement"
+
+
+def test_hub_page_is_not_mistaken_for_the_notice():
+    hub = "Privacy and data. How we use your data. Service privacy notices. Information rights policy."
+    notice = ("Brighton & Hove City Council is the data controller. Our lawful basis is public task. "
+              "Your rights include the right to access your data. We retain records for 6 years. "
+              "You can complain to the Information Commissioner's Office.")
+    assert not looks_like_notice(hub) and looks_like_notice(notice)
+
+
+def test_readable_page_beats_unreadable_pdf():
+    from scanner.privacy_page import best_notice
+    hub = {"url": "https://www.camden.gov.uk/data-protection-privacy-and-cookies",
+           "full_text": "Data protection, privacy and cookies. " * 40}
+    pdf = {"url": "https://www.camden.gov.uk/documents/d/guest/privacy-notice", "full_text": ""}
+    assert best_notice([pdf, hub]) is hub

@@ -29,7 +29,7 @@ def run_scan(url):
                      if any(w in urlparse(p["url"]).path.lower() for w in PRIVACY_WORDS) and p["status"] < 400]
     # Pick the page that looks most like a real notice, not a news article, cookie page or list of notices.
     privacy_page = best_notice(privacy_pages)
-    privacy_text = privacy_page["text"] if privacy_page else ""
+    privacy_text = privacy_page["full_text"] if privacy_page else ""  # collapsed sections included
 
     return {
         "pages_crawled": [p["url"] for p in crawl_result["pages"]],

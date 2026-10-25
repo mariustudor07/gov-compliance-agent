@@ -19,7 +19,7 @@ from protego import Protego
 from scrapling.fetchers import Fetcher, StealthySession
 
 from .accessibility import run_axe
-from .privacy_page import link_rank
+from .privacy_page import is_main_notice, link_rank, looks_like_notice, page_name
 
 logging.getLogger("scrapling").setLevel(logging.WARNING)  # one INFO line per request is too noisy
 
@@ -28,12 +28,23 @@ KEYWORDS = ("privacy", "cookie", "accessibility", "data-protection")
 # The pages we need, for looking them up in the sitemap when the homepage doesn't link to one.
 PAGE_TYPES = (("privacy", "data-protection"), ("cookie",), ("accessibility",))
 SHORT_PAGE_CHARS = 3000  # a privacy page shorter than this is probably a hub linking to the real policy
-MAX_SITEMAPS = 5  # sitemap files read per site (an index can list hundreds)
+# Sitemap files read per site, the index included (an index can list hundreds). Brighton's privacy hub is
+# in file 6 of 7; each file is one plain HTTP request, and we only read them when a page type is missing.
+MAX_SITEMAPS = 10
 # Sitemaps come from the site we're auditing, so don't expand entities or fetch anything they point to.
 SAFE_XML = etree.XMLParser(resolve_entities=False, no_network=True, huge_tree=False)
 # robots.txt and sitemaps are public files: read them even on a bad certificate (security.py reports that),
 # try once, and don't add Scrapling's fake "came from Google" referer.
 SITEMAP_REQUEST = {"timeout": 10, "retries": 1, "verify": False, "stealthy_headers": False}
+# The page's text INCLUDING collapsed sections: Camden's whole privacy statement is in closed accordions,
+# which inner_text skips. One line per block element, because the classifier splits sentences on newlines.
+FULL_TEXT_JS = """() => {
+  const body = document.body.cloneNode(true);
+  body.querySelectorAll('script, style, noscript, template, svg').forEach(e => e.remove());
+  body.querySelectorAll('p, div, li, h1, h2, h3, h4, h5, h6, td, th, dt, dd, br, section, article')
+      .forEach(e => e.append('\\n'));
+  return body.textContent.replace(/[ \\t\\r\\f\\v]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').trim();
+}"""
 
 
 def crawl(url, max_pages=5):
@@ -41,7 +52,7 @@ def crawl(url, max_pages=5):
 
     Returns:
         {
-          "pages": [{"url", "html", "text", "headers", "status", "frames_html", "axe_violations"}, ...],
+          "pages": [{"url", "html", "text", "full_text", "headers", "status", "frames_html", "axe_violations"}, ...],
           "cookies_before_consent": [ {name, domain, ...}, ... ],
           "homepage_screenshot": PNG bytes,
         }
@@ -64,14 +75,18 @@ def crawl(url, max_pages=5):
         pages.append(home["snapshot"])
 
         host = urlparse(home["snapshot"]["url"]).netloc
-        # Proper "privacy notice/policy" links first, cookie/news links last (stable: keeps page order otherwise).
-        wanted = sorted(_matching(home["links"], host, KEYWORDS), key=link_rank)
+        found = {words: sorted(_matching(home["links"], host, words), key=lambda h: _page_rank(h, words))
+                 for words in PAGE_TYPES}
         # Pages the homepage doesn't link to (common for accessibility statements) can still be in the sitemap.
-        missing = [words for words in PAGE_TYPES if not any(w in h.lower() for w in words for h in wanted)]
+        missing = [words for words, links in found.items() if not links]
         if missing:
             sitemap = _sitemap_links(home["snapshot"]["url"])
             for words in missing:
-                wanted += sorted(_matching(sitemap, host, words), key=link_rank)[:1]
+                found[words] = sorted(_matching(sitemap, host, words), key=lambda h: _page_rank(h, words))[:1]
+        # The best page of each type first, so a stray match can't use up a slot (Brighton's
+        # /website-and-accessibility/languages); then the other matching links, best first.
+        best = [links[0] for links in found.values() if links]
+        wanted = best + sorted((h for h in _matching(home["links"], host, KEYWORDS) if h not in best), key=link_rank)
         visited = {_same_page(home["snapshot"]["url"])}
 
         for href in wanted[: max_pages - 1]:
@@ -84,9 +99,12 @@ def crawl(url, max_pages=5):
             except Exception as e:
                 print(f"Could not open {href}: {e}")
                 continue
-            # Many sites link to a short privacy "hub" page that links on to the real policy.
-            # Follow those links one level deeper so we read the actual notice.
-            if "privacy" in visit["snapshot"]["url"].lower() and len(visit["snapshot"]["text"]) < SHORT_PAGE_CHARS:
+            # Many sites link to a privacy "hub" page that links on to the real policy. Follow those links
+            # one level deeper so we read the actual notice. A hub can be long (menus, footer), so judge
+            # it by what it says too: Brighton's /privacy-and-data is 3,400 characters of links.
+            snapshot = visit["snapshot"]
+            if "privacy" in snapshot["url"].lower() and (len(snapshot["full_text"]) < SHORT_PAGE_CHARS
+                                                          or not looks_like_notice(snapshot["full_text"])):
                 deeper = sorted((h for h in _matching(visit["links"], host, ("privacy",))
                                  if _same_page(h) not in visited), key=link_rank)
                 for deep in deeper[:2]:
@@ -112,6 +130,7 @@ def _visit(session, url, first=False):
             seen["screenshot"] = page.screenshot()
         seen["html"] = page.content()
         seen["text"] = page.inner_text("body")
+        seen["full_text"] = page.evaluate(FULL_TEXT_JS)
         seen["frames_html"] = _frames_html(page)
         seen["links"] = _links(page)
         seen["axe_violations"] = run_axe(page)
@@ -124,6 +143,7 @@ def _visit(session, url, first=False):
             "url": response.url,
             "html": seen["html"],
             "text": seen["text"],
+            "full_text": seen["full_text"],
             "headers": dict(response.headers),
             "status": response.status,
             "frames_html": seen["frames_html"],
@@ -156,6 +176,20 @@ def _matching(links, host, keywords):
             found.append(href)
             seen.add(_same_page(href))
     return found
+
+
+def _page_rank(url, words):
+    """Lower is better, for picking the one page of a type to open. The keyword in the page's own name
+    beats one in a parent folder; an accessibility *statement* beats other accessibility pages; for
+    privacy, the site's main notice beats one service's notice, and a shallower address beats a deeper one
+    (nhs.uk's /our-policies/privacy-policy, not one NHS App feature's /.../privacy-policy five folders down).
+    Shorter names break ties."""
+    name = page_name(url)
+    in_name = 0 if any(w in name for w in words) else 1
+    if words == PAGE_TYPES[0]:
+        depth = len([part for part in urlparse(url).path.split("/") if part])
+        return (0 if is_main_notice(url) else 1, in_name, link_rank(url), depth, len(name))
+    return (in_name, 0 if "statement" in name or "policy" in name else 1, len(name))
 
 
 def _same_page(url):
