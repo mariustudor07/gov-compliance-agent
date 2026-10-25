@@ -26,6 +26,9 @@ const STEPS = [
 
 const STEP_MS = 3500;
 
+/** How long it takes to show every step once. */
+export const ALL_STEPS_MS = STEPS.length * STEP_MS;
+
 export default function LoadingSteps() {
   const [index, setIndex] = useState(0);
 

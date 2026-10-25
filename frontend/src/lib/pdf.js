@@ -212,7 +212,7 @@ export async function downloadReportPdf(result, { usingMock = false } = {}) {
   y += drawLines([`Scanned ${formatDate(scanned_at)}`], M, y, 9, "normal", FAINT) + 10;
 
   if (usingMock) {
-    const lines = wrap("Example data: this report was generated without the live scanner connected.", W - 24, 9);
+    const lines = wrap("Example report: these results are not for the site entered.", W - 24, 9);
     const height = lines.length * lineHeight(9) + 14;
     card(M, y, W, height, tint(AMBER, 0.1));
     drawLines(lines, M + 12, y + 7, 9, "normal", INK);

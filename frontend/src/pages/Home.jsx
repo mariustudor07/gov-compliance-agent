@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { postScan } from "../lib/api";
-import LoadingSteps from "../components/LoadingSteps";
+import LoadingSteps, { ALL_STEPS_MS } from "../components/LoadingSteps";
 import HowItWorks from "../components/HowItWorks";
 import mockResult from "../mock/example_scan.json";
 
@@ -30,6 +30,7 @@ export default function Home() {
 
     let result;
     let usingMock = false;
+    const started = Date.now();
     try {
       result = await postScan(target);
     } catch {
@@ -37,6 +38,9 @@ export default function Home() {
       // frontend can be built and demoed on its own (README section "Dawan").
       usingMock = true;
       result = { ...mockResult, url: target, scanned_at: new Date().toISOString() };
+      // Walk through every scan step first, as a real scan would.
+      const remaining = ALL_STEPS_MS - (Date.now() - started);
+      if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining));
     }
 
     setLoading(false);
