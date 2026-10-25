@@ -1,7 +1,17 @@
 // Talks to backend/api/main.py (FastAPI). See README section 5 for the contract.
 const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
 
+// The deployed site has no backend unless VITE_API_BASE is set. Calling
+// 127.0.0.1 from a public page makes Chrome hold the request behind a
+// local-network permission prompt, so the scan hangs instead of failing.
+const NO_BACKEND =
+  !import.meta.env.VITE_API_BASE &&
+  !["localhost", "127.0.0.1"].includes(window.location.hostname);
+
 async function request(path, options) {
+  if (NO_BACKEND) {
+    throw new Error("No backend configured for this deployment");
+  }
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
     ...options,
